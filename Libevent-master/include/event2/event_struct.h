@@ -148,11 +148,11 @@ struct event {
 		/* used by signal events */
 		struct {
 			LIST_ENTRY (event) ev_signal_next;
-			short ev_ncalls;
-			/* Allows deletes in callback */
+			short ev_ncalls;	/*事件就绪执行时，调用ev_callback的次数，通常为1*/
+			/* Allows deletes in callback 指针，通常指向ev_ncalls或者为NULL*/
 			short *ev_pncalls;
 		} ev_signal;
-	} ev_;
+	} ev_;	/*针对不同类型的事件设置链表记录*/
 
 
 	struct timeval ev_timeout;	/*timeout事件的超市值*/
