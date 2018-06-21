@@ -119,24 +119,24 @@ struct event_callback {
 	void *evcb_arg;
 };
 
-struct event_base;
+struct event_base;	
 struct event {
 	struct event_callback ev_evcallback;  /*回调函数结构体*/
 
 	/* for managing timeouts 
-	 * 如果是timeout事件，它们是event在小根堆中的索引和超时值，
+	 * 如果是timeout事件，它们是event在小根堆中的索引，
 	 * libevent使用小根堆来管理定时事件
 	 */
 	union {
 		TAILQ_ENTRY(event) ev_next_with_common_timeout;
 		int min_heap_idx;
 	} ev_timeout_pos;
-	evutil_socket_t ev_fd;
+	evutil_socket_t ev_fd;	/*对于I/O事件，是绑定的文件描述符；对于signal事件，是绑定的信号*/
 
 	short ev_events;	/*event关注的事件类型*/
-	short ev_res;		/* result passed to event callback */
+	short ev_res;		/* 记录了当前激活事件的类型result passed to event callback */
 
-	struct event_base *ev_base;
+	struct event_base *ev_base;	/*该事件所属的反应堆实例，这是一个event_base结构体*/
 
 	union {
 		/* used for io events */
@@ -155,7 +155,7 @@ struct event {
 	} ev_;
 
 
-	struct timeval ev_timeout;
+	struct timeval ev_timeout;	/*timeout事件的超市值*/
 };
 
 TAILQ_HEAD (event_list, event);
