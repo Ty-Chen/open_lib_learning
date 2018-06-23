@@ -2091,9 +2091,11 @@ event_base_once(struct event_base *base, evutil_socket_t fd, short events,
 	return (0);
 }
 
+/*事件的配置：赋值以及异常处理*/
 int
 event_assign(struct event *ev, struct event_base *base, evutil_socket_t fd, short events, void (*callback)(evutil_socket_t, short, void *), void *arg)
 {
+	/*异常处理*/
 	if (!base)
 		base = current_base;
 	if (arg == &event_self_cbarg_ptr_)
@@ -2101,8 +2103,10 @@ event_assign(struct event *ev, struct event_base *base, evutil_socket_t fd, shor
 
 	event_debug_assert_not_added_(ev);
 
+	/*将事件的堆属性赋值为已有的事件堆base*/
 	ev->ev_base = base;
 
+	/*赋值*/
 	ev->ev_callback = callback;
 	ev->ev_arg = arg;
 	ev->ev_fd = fd;
@@ -2112,7 +2116,10 @@ event_assign(struct event *ev, struct event_base *base, evutil_socket_t fd, shor
 	ev->ev_ncalls = 0;
 	ev->ev_pncalls = NULL;
 
+	/*根据事件类型分开进行错误判断*/
+	/*信号类型*/
 	if (events & EV_SIGNAL) {
+		/*信号类型不允许有IO类型的读写关闭标记位*/
 		if ((events & (EV_READ|EV_WRITE|EV_CLOSED)) != 0) {
 			event_warnx("%s: EV_SIGNAL is not compatible with "
 			    "EV_READ, EV_WRITE or EV_CLOSED", __func__);
@@ -2120,6 +2127,7 @@ event_assign(struct event *ev, struct event_base *base, evutil_socket_t fd, shor
 		}
 		ev->ev_closure = EV_CLOSURE_EVENT_SIGNAL;
 	} else {
+		/*对永久事件，超时置零*/
 		if (events & EV_PERSIST) {
 			evutil_timerclear(&ev->ev_io_timeout);
 			ev->ev_closure = EV_CLOSURE_EVENT_PERSIST;
@@ -2130,11 +2138,13 @@ event_assign(struct event *ev, struct event_base *base, evutil_socket_t fd, shor
 
 	min_heap_elem_init_(ev);
 
+	/*优先级：默认放在队列中间*/
 	if (base != NULL) {
 		/* by default, we put new events into the middle priority */
 		ev->ev_pri = base->nactivequeues / 2;
 	}
 
+	/*debug功能开启*/
 	event_debug_note_setup_(ev);
 
 	return 0;
@@ -2184,13 +2194,19 @@ event_base_get_running_event(struct event_base *base)
 	return ev;
 }
 
+/*新建事件*/
 struct event *
 event_new(struct event_base *base, evutil_socket_t fd, short events, void (*cb)(evutil_socket_t, short, void *), void *arg)
 {
+	/*创建指针*/
 	struct event *ev;
 	ev = mm_malloc(sizeof(struct event));
+
+	/*错误判断*/
 	if (ev == NULL)
 		return (NULL);
+
+	/*调用event_assign*/
 	if (event_assign(ev, base, fd, events, cb, arg) < 0) {
 		mm_free(ev);
 		return (NULL);
@@ -2199,6 +2215,7 @@ event_new(struct event_base *base, evutil_socket_t fd, short events, void (*cb)(
 	return (ev);
 }
 
+/*释放事件（包括资源释放）*/
 void
 event_free(struct event *ev)
 {
@@ -2207,8 +2224,8 @@ event_free(struct event *ev)
 	// event_debug_assert_is_setup_(ev);
 
 	/* make sure that this event won't be coming back to haunt us. */
-	event_del(ev);
-	event_debug_note_teardown_(ev);
+	event_d el(ev);
+	event_debug_note_teardown_(ev);/*关闭针对ev的debug*/
 	mm_free(ev);
 
 }
@@ -2327,7 +2344,7 @@ event_callback_finalize_many_(struct event_base *base, int n_cbs, struct event_c
 	return 0;
 }
 
-/*
+/* 设置优先级
  * Set's the priority of an event - if an event is already scheduled
  * changing the priority is going to fail.
  */
@@ -2337,6 +2354,7 @@ event_priority_set(struct event *ev, int pri)
 {
 	event_debug_assert_is_setup_(ev);
 
+	/*优先级设置对已激活的事件无效*/
 	if (ev->ev_flags & EVLIST_ACTIVE)
 		return (-1);
 	if (pri < 0 || pri >= ev->ev_base->nactivequeues)
@@ -2347,7 +2365,7 @@ event_priority_set(struct event *ev, int pri)
 	return (0);
 }
 
-/*
+/* 检测某事件是否待发生，返回标记位
  * Checks if a specific event is pending or scheduled.
  */
 
@@ -2356,6 +2374,7 @@ event_pending(const struct event *ev, short event, struct timeval *tv)
 {
 	int flags = 0;
 
+	/*异常检测*/
 	if (EVUTIL_FAILURE_CHECK(ev->ev_base == NULL)) {
 		event_warnx("%s: event has no event_base set.", __func__);
 		return 0;
@@ -2364,6 +2383,7 @@ event_pending(const struct event *ev, short event, struct timeval *tv)
 	EVBASE_ACQUIRE_LOCK(ev->ev_base, th_base_lock);
 	event_debug_assert_is_setup_(ev);
 
+	/*检查标记位*/
 	if (ev->ev_flags & EVLIST_INSERTED)
 		flags |= (ev->ev_events & (EV_READ|EV_WRITE|EV_CLOSED|EV_SIGNAL));
 	if (ev->ev_flags & (EVLIST_ACTIVE|EVLIST_ACTIVE_LATER))
@@ -2373,7 +2393,7 @@ event_pending(const struct event *ev, short event, struct timeval *tv)
 
 	event &= (EV_TIMEOUT|EV_READ|EV_WRITE|EV_CLOSED|EV_SIGNAL);
 
-	/* See if there is a timeout that we should report */
+	/* 添加超时 See if there is a timeout that we should report */
 	if (tv != NULL && (flags & event & EV_TIMEOUT)) {
 		struct timeval tmp = ev->ev_timeout;
 		tmp.tv_usec &= MICROSECONDS_MASK;
@@ -2395,6 +2415,7 @@ event_initialized(const struct event *ev)
 	return 1;
 }
 
+/*获取event的属性：包括事件堆event_base, IO事件的fd, 信号事件的信息，回调函数等*/
 void
 event_get_assignment(const struct event *event, struct event_base **base_out, evutil_socket_t *fd_out, short *events_out, event_callback_fn *callback_out, void **arg_out)
 {
@@ -2460,16 +2481,19 @@ event_get_priority(const struct event *ev)
 	return ev->ev_pri;
 }
 
+/*添加事件*/
 int
 event_add(struct event *ev, const struct timeval *tv)
 {
 	int res;
 
+	/*异常处理，检查是否有事件堆event_base*/
 	if (EVUTIL_FAILURE_CHECK(!ev->ev_base)) {
 		event_warnx("%s: event has no event_base set.", __func__);
 		return -1;
 	}
 
+	/*加锁、调用event_add_nolock_添加事件，解锁*/
 	EVBASE_ACQUIRE_LOCK(ev->ev_base, th_base_lock);
 
 	res = event_add_nolock_(ev, tv, 0);
@@ -2581,6 +2605,7 @@ event_add_nolock_(struct event *ev, const struct timeval *tv,
 	int res = 0;
 	int notify = 0;
 
+	/*上锁判断，debug判断*/
 	EVENT_BASE_ASSERT_LOCKED(base);
 	event_debug_assert_is_setup_(ev);
 
@@ -2602,6 +2627,11 @@ event_add_nolock_(struct event *ev, const struct timeval *tv,
 	}
 
 	/*
+	 * 新的timer事件，调用timer heap接口在堆上预留一个位置  
+     * 注：这样能保证该操作的原子性：  
+     * 向系统I/O机制注册可能会失败，而当在堆上预留成功后，  
+     * 定时事件的添加将肯定不会失败；  
+     * 而预留位置的可能结果是堆扩充，但是内部元素并不会改变
 	 * prepare for timeout insertion further below, if we get a
 	 * failure on any step, we should not change any state.
 	 */
@@ -2610,6 +2640,7 @@ event_add_nolock_(struct event *ev, const struct timeval *tv,
 			1 + min_heap_size_(&base->timeheap)) == -1)
 			return (-1);  /* ENOMEM == errno */
 	}
+
 
 	/* If the main thread is currently executing a signal event's
 	 * callback, and we are not the main thread, then we want to wait
@@ -2624,12 +2655,17 @@ event_add_nolock_(struct event *ev, const struct timeval *tv,
 	}
 #endif
 
+	/*如果事件ev不在已注册或者激活链表中，则调用evbase注册事件 */
 	if ((ev->ev_events & (EV_READ|EV_WRITE|EV_CLOSED|EV_SIGNAL)) &&
 	    !(ev->ev_flags & (EVLIST_INSERTED|EVLIST_ACTIVE|EVLIST_ACTIVE_LATER))) {
+	    
+	    /*判断io或者信号分类添加*/
 		if (ev->ev_events & (EV_READ|EV_WRITE|EV_CLOSED))
 			res = evmap_io_add_(base, ev->ev_fd, ev);
 		else if (ev->ev_events & EV_SIGNAL)
 			res = evmap_signal_add_(base, (int)ev->ev_fd, ev);
+		
+		/*// 注册成功，插入event到已注册链表中 */
 		if (res != -1)
 			event_queue_insert_inserted(base, ev);
 		if (res == 1) {
@@ -2639,7 +2675,7 @@ event_add_nolock_(struct event *ev, const struct timeval *tv,
 		}
 	}
 
-	/*
+	/* 准备添加定时事件
 	 * we should change the timeout state only if the previous event
 	 * addition succeeded.
 	 */
@@ -2651,7 +2687,7 @@ event_add_nolock_(struct event *ev, const struct timeval *tv,
 		int old_timeout_idx;
 #endif
 
-		/*
+		/* 
 		 * for persistent timeout events, we remember the
 		 * timeout value and re-add the event.
 		 *
@@ -2660,13 +2696,15 @@ event_add_nolock_(struct event *ev, const struct timeval *tv,
 		if (ev->ev_closure == EV_CLOSURE_EVENT_PERSIST && !tv_is_absolute)
 			ev->ev_io_timeout = *tv;
 
+		/*EVLIST_TIMEOUT表明event已经在定时器堆中了，删除旧的*/
 #ifndef USE_REINSERT_TIMEOUT
 		if (ev->ev_flags & EVLIST_TIMEOUT) {
 			event_queue_remove_timeout(base, ev);
 		}
 #endif
 
-		/* Check if it is active due to a timeout.  Rescheduling
+		/* 如果事件已经是就绪状态则从激活链表中删除 
+		 * Check if it is active due to a timeout.  Rescheduling
 		 * this timeout before the callback can be executed
 		 * removes it from the active list. */
 		if ((ev->ev_flags & EVLIST_ACTIVE) &&
@@ -2674,6 +2712,7 @@ event_add_nolock_(struct event *ev, const struct timeval *tv,
 			if (ev->ev_events & EV_SIGNAL) {
 				/* See if we are just active executing
 				 * this event in a loop
+				 * 将ev_callback调用次数设置为0以终止循环  
 				 */
 				if (ev->ev_ncalls && ev->ev_pncalls) {
 					/* Abort loop */
@@ -2684,6 +2723,7 @@ event_add_nolock_(struct event *ev, const struct timeval *tv,
 			event_queue_remove_active(base, event_to_event_callback(ev));
 		}
 
+		/* 计算时间，并插入到timer根堆中 */
 		gettime(base, &now);
 
 		common_timeout = is_common_timeout(tv, base);
@@ -2751,11 +2791,13 @@ event_del_(struct event *ev, int blocking)
 	int res;
 	struct event_base *base = ev->ev_base;
 
+	/*异常处理*/
 	if (EVUTIL_FAILURE_CHECK(!base)) {
 		event_warnx("%s: event has no event_base set.", __func__);
 		return -1;
 	}
 
+	/*上锁*/
 	EVBASE_ACQUIRE_LOCK(base, th_base_lock);
 	res = event_del_nolock_(ev, blocking);
 	EVBASE_RELEASE_LOCK(base, th_base_lock);
@@ -2781,7 +2823,7 @@ event_del_noblock(struct event *ev)
 	return event_del_(ev, EVENT_DEL_NOBLOCK);
 }
 
-/** Helper for event_del: always called with th_base_lock held.
+/** 事件删除 Helper for event_del: always called with th_base_lock held.
  *
  * "blocking" must be one of the EVENT_DEL_{BLOCK, NOBLOCK, AUTOBLOCK,
  * EVEN_IF_FINALIZING} values. See those for more information.
@@ -2795,7 +2837,9 @@ event_del_nolock_(struct event *ev, int blocking)
 	event_debug(("event_del: %p (fd "EV_SOCK_FMT"), callback %p",
 		ev, EV_SOCK_ARG(ev->ev_fd), ev->ev_callback));
 
-	/* An event without a base has not been added */
+	/* 异常处理，ev_base为NULL，表明ev没有被注册 
+	 * An event without a base has not been added 
+	 */
 	if (ev->ev_base == NULL)
 		return (-1);
 
@@ -2812,7 +2856,7 @@ event_del_nolock_(struct event *ev, int blocking)
 
 	EVUTIL_ASSERT(!(ev->ev_flags & ~EVLIST_ALL));
 
-	/* See if we are just active executing this event in a loop */
+	/* 终止循环 See if we are just active executing this event in a loop */
 	if (ev->ev_events & EV_SIGNAL) {
 		if (ev->ev_ncalls && ev->ev_pncalls) {
 			/* Abort loop */
@@ -2821,7 +2865,8 @@ event_del_nolock_(struct event *ev, int blocking)
 	}
 
 	if (ev->ev_flags & EVLIST_TIMEOUT) {
-		/* NOTE: We never need to notify the main thread because of a
+		/* 从超时队列中删除
+		 * NOTE: We never need to notify the main thread because of a
 		 * deleted timeout event: all that could happen if we don't is
 		 * that the dispatch loop might wake up too early.  But the
 		 * point of notifying the main thread _is_ to wake up the
@@ -2831,11 +2876,13 @@ event_del_nolock_(struct event *ev, int blocking)
 		event_queue_remove_timeout(base, ev);
 	}
 
+	/*从激活/等待激活队列中删除*/
 	if (ev->ev_flags & EVLIST_ACTIVE)
 		event_queue_remove_active(base, event_to_event_callback(ev));
 	else if (ev->ev_flags & EVLIST_ACTIVE_LATER)
 		event_queue_remove_active_later(base, event_to_event_callback(ev));
 
+	/*从对应的链表中删除事件 */
 	if (ev->ev_flags & EVLIST_INSERTED) {
 		event_queue_remove_inserted(base, ev);
 		if (ev->ev_events & (EV_READ|EV_WRITE|EV_CLOSED))
@@ -2853,7 +2900,7 @@ event_del_nolock_(struct event *ev, int blocking)
 			notify = 1;
 	}
 
-	/* if we are not in the right thread, we need to wake up the loop */
+	/* 多线程情况下，判断是否在该线程执行 if we are not in the right thread, we need to wake up the loop */
 	if (res != -1 && notify && EVBASE_NEED_NOTIFY(base))
 		evthread_notify_base(base);
 
@@ -2880,11 +2927,13 @@ event_del_nolock_(struct event *ev, int blocking)
 void
 event_active(struct event *ev, int res, short ncalls)
 {
+	/*异常处理*/
 	if (EVUTIL_FAILURE_CHECK(!ev->ev_base)) {
 		event_warnx("%s: event has no event_base set.", __func__);
 		return;
 	}
 
+	/*上锁*/
 	EVBASE_ACQUIRE_LOCK(ev->ev_base, th_base_lock);
 
 	event_debug_assert_is_setup_(ev);
@@ -2894,7 +2943,7 @@ event_active(struct event *ev, int res, short ncalls)
 	EVBASE_RELEASE_LOCK(ev->ev_base, th_base_lock);
 }
 
-
+/*激活事件*/
 void
 event_active_nolock_(struct event *ev, int res, short ncalls)
 {
@@ -2906,11 +2955,13 @@ event_active_nolock_(struct event *ev, int res, short ncalls)
 	base = ev->ev_base;
 	EVENT_BASE_ASSERT_LOCKED(base);
 
+	/*标记为终止则无法激活*/
 	if (ev->ev_flags & EVLIST_FINALIZING) {
 		/* XXXX debug */
 		return;
 	}
 
+	/*根据标记位判断立刻激活或者稍后激活*/
 	switch ((ev->ev_flags & (EVLIST_ACTIVE|EVLIST_ACTIVE_LATER))) {
 	default:
 	case EVLIST_ACTIVE|EVLIST_ACTIVE_LATER:
@@ -2943,6 +2994,7 @@ event_active_nolock_(struct event *ev, int res, short ncalls)
 		ev->ev_pncalls = NULL;
 	}
 
+	/*将事件添加入激活列表中*/
 	event_callback_activate_nolock_(base, event_to_event_callback(ev));
 }
 
