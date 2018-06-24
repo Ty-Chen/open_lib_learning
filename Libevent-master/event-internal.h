@@ -359,6 +359,7 @@ struct event_base {
 
 };
 
+/*队列元素的类型*/
 struct event_config_entry {
 	TAILQ_ENTRY(event_config_entry) next;
 
@@ -368,13 +369,22 @@ struct event_config_entry {
 /** Internal structure: describes the configuration we want for an event_base
  * that we're about to allocate. */
 struct event_config {
+
+	/*生成队列管理配置*/
 	TAILQ_HEAD(event_configq, event_config_entry) entries;
 
+	/*CPU数量*/
 	int n_cpus_hint;
+
+	/*限制参数：最大分发事件间隔时间，最大回调次数，优先级限制*/
 	struct timeval max_dispatch_interval;
 	int max_dispatch_callbacks;
 	int limit_callbacks_after_prio;
+
+	/*指定多路IO复用函数应该满足哪些特征*/
 	enum event_method_feature require_features;
+
+	/*通过函数event_config_set_flag设置*/
 	enum event_base_config_flag flags;
 };
 

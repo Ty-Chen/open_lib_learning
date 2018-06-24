@@ -1144,7 +1144,7 @@ int event_assign(struct event *, struct event_base *, evutil_socket_t, short, ev
    and non-active first.
  */
 EVENT2_EXPORT_SYMBOL
-void event_free(struct event *);
+void event_free(struct event *);+
 
 /**
  * Callback type for event_finalize and event_free_finalize().

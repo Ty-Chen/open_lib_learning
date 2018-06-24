@@ -502,11 +502,16 @@ event_init(void)
 	return (base);
 }
 
+/*创建event_base*/
 struct event_base *
 event_base_new(void)
 {
+
 	struct event_base *base = NULL;
+	/*创建一个event_config结构*/	
 	struct event_config *cfg = event_config_new();
+
+	/*用event_config为event_base赋值*/
 	if (cfg) {
 		base = event_base_new_with_config(cfg);
 		event_config_free(cfg);
@@ -598,6 +603,9 @@ event_base_new_with_config(const struct event_config *cfg)
 	event_debug_mode_too_late = 1;
 #endif
 
+    /* 之所以不用mm_malloc是因为mm_malloc并不会清零该内存区域。  
+     * 而这个函数是会清零申请到的内存区域，这相当于被base初始化  
+	 */
 	if ((base = mm_calloc(1, sizeof(struct event_base))) == NULL) {
 		event_warn("%s: calloc", __func__);
 		return NULL;
