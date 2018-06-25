@@ -611,9 +611,11 @@ event_base_new_with_config(const struct event_config *cfg)
 		return NULL;
 	}
 
+	/*根据config的flags赋值*/
 	if (cfg)
 		base->flags = cfg->flags;
 
+	/*检查环境时间：可能系统时间发生了变化*/
 	should_check_environment =
 	    !(cfg && (cfg->flags & EVENT_BASE_FLAG_IGNORE_ENV));
 
@@ -634,6 +636,7 @@ event_base_new_with_config(const struct event_config *cfg)
 		gettime(base, &tmp);
 	}
 
+	/*初始化需要用到的堆、pair、fd、哈希列表等*/
 	min_heap_ctor_(&base->timeheap);
 
 	base->sig.ev_signal_pair[0] = -1;
@@ -649,6 +652,7 @@ event_base_new_with_config(const struct event_config *cfg)
 
 	base->evbase = NULL;
 
+	/*根据cfg赋值*/
 	if (cfg) {
 		memcpy(&base->max_dispatch_time,
 		    &cfg->max_dispatch_interval, sizeof(struct timeval));
@@ -667,6 +671,8 @@ event_base_new_with_config(const struct event_config *cfg)
 	    base->max_dispatch_time.tv_sec == -1)
 		base->limit_callbacks_after_prio = INT_MAX;
 
+
+	/*选择IO复用结构体*/
 	for (i = 0; eventops[i] && !base->evbase; i++) {
 		if (cfg != NULL) {
 			/* determine if this backend should be avoided */
@@ -688,6 +694,7 @@ event_base_new_with_config(const struct event_config *cfg)
 		base->evbase = base->evsel->init(base);
 	}
 
+	/*检查event_base是否为空，若空则报错*/
 	if (base->evbase == NULL) {
 		event_warnx("%s: no event mechanism available",
 		    __func__);
@@ -705,7 +712,12 @@ event_base_new_with_config(const struct event_config *cfg)
 		return NULL;
 	}
 
-	/* prepare for threading */
+	/* prepare for threading 
+	 * 测试evthread_lock_callbacks结构中的lock指针函数是否为NULL  
+     * 即测试Libevent是否已经初始化为支持多线程模式。  
+     * 由于一开始是用mm_calloc申请内存的，所以该内存区域的值为0  
+     * 对于th_base_lock变量，目前的值为NULL.
+	 */
 
 #if !defined(EVENT__DISABLE_THREAD_SUPPORT) && !defined(EVENT__DISABLE_DEBUG_MODE)
 	event_debug_created_threadable_ctx_ = 1;
@@ -726,6 +738,7 @@ event_base_new_with_config(const struct event_config *cfg)
 	}
 #endif
 
+	/*检测是否开启IOCP*/
 #ifdef _WIN32
 	if (cfg && (cfg->flags & EVENT_BASE_FLAG_STARTUP_IOCP))
 		event_base_start_iocp_(base, cfg->n_cpus_hint);
@@ -1912,6 +1925,7 @@ event_loop(int flags)
 	return event_base_loop(current_base, flags);
 }
 
+/*事件主循环部分*/
 int
 event_base_loop(struct event_base *base, int flags)
 {
@@ -1924,6 +1938,7 @@ event_base_loop(struct event_base *base, int flags)
 	 * as we invoke user callbacks. */
 	EVBASE_ACQUIRE_LOCK(base, th_base_lock);
 
+	/*异常检测*/
 	if (base->running_loop) {
 		event_warnx("%s: reentrant invocation.  Only one event_base_loop"
 		    " can run on each event_base at once.", __func__);
@@ -1933,6 +1948,7 @@ event_base_loop(struct event_base *base, int flags)
 
 	base->running_loop = 1;
 
+	/*清空时间缓存*/
 	clear_time_cache(base);
 
 	if (base->sig.ev_signal_added && base->sig.ev_n_signals_added)
@@ -1946,11 +1962,15 @@ event_base_loop(struct event_base *base, int flags)
 
 	base->event_gotterm = base->event_break = 0;
 
+	/*事件主循环*/
 	while (!done) {
 		base->event_continue = 0;
 		base->n_deferreds_queued = 0;
 
-		/* Terminate the loop if we have been asked to */
+		/* 查看是否需要跳出循环，程序可以调用event_loopexit_cb()设置event_gotterm标记  
+         * 调用event_base_loopbreak()设置event_break标记  
+         * Terminate the loop if we have been asked to 
+         */
 		if (base->event_gotterm) {
 			break;
 		}
@@ -1959,18 +1979,20 @@ event_base_loop(struct event_base *base, int flags)
 			break;
 		}
 
+		/*根据timer heap中事件的最小超时时间，计算系统I/O demultiplexer的最大等待时间 */
 		tv_p = &tv;
 		if (!N_ACTIVE_CALLBACKS(base) && !(flags & EVLOOP_NONBLOCK)) {
 			timeout_next(base, &tv_p);
 		} else {
-			/*
+			/* 依然有未处理的就绪时间，就让I/O demultiplexer立即返回，不必等待  
+             * 下面会提到，在libevent中，低优先级的就绪事件可能不能立即被处理
 			 * if we have active events, we just poll new events
 			 * without waiting.
 			 */
 			evutil_timerclear(&tv);
 		}
 
-		/* If we have no events, we just exit */
+		/* 如果当前没有注册事件，就退出 If we have no events, we just exit */
 		if (0==(flags&EVLOOP_NO_EXIT_ON_EMPTY) &&
 		    !event_haveevents(base) && !N_ACTIVE_CALLBACKS(base)) {
 			event_debug(("%s: no events registered.", __func__));
@@ -1982,6 +2004,8 @@ event_base_loop(struct event_base *base, int flags)
 
 		clear_time_cache(base);
 
+		/* 调用系统I/O demultiplexer等待就绪I/O events，可能是epoll_wait，或者select等；  
+        // 在evsel->dispatch()中，会把就绪signal event、I/O event插入到激活链表中  */
 		res = evsel->dispatch(base, tv_p);
 
 		if (res == -1) {
@@ -1995,6 +2019,11 @@ event_base_loop(struct event_base *base, int flags)
 
 		timeout_process(base);
 
+		/* 调用event_process_active()处理激活链表中的就绪event，调用其回调函数执行事件处理  
+         * 该函数会寻找最高优先级（priority值越小优先级越高）的激活事件链表，  
+         * 然后处理链表中的所有就绪事件；  
+         * 因此低优先级的就绪事件可能得不到及时处理； 
+         */
 		if (N_ACTIVE_CALLBACKS(base)) {
 			int n = event_process_active(base);
 			if ((flags & EVLOOP_ONCE)
@@ -2006,6 +2035,7 @@ event_base_loop(struct event_base *base, int flags)
 	}
 	event_debug(("%s: asked to terminate loop.", __func__));
 
+	/*循环结束，清空时间缓存 */
 done:
 	clear_time_cache(base);
 	base->running_loop = 0;
