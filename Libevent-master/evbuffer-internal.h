@@ -77,14 +77,16 @@ struct evbuffer_cb_entry {
 
 struct bufferevent;
 struct evbuffer_chain;
+
 struct evbuffer {
+	/*使用evbuffer_chain存储缓冲：链表形式的多个缓冲区*/
 	/** The first chain in this buffer's linked list of chains. */
 	struct evbuffer_chain *first;
 	/** The last chain in this buffer's linked list of chains. */
 	struct evbuffer_chain *last;
 
 	/** Pointer to the next pointer pointing at the 'last_with_data' chain.
-	 *
+	 * 该指针指向最后一个有数据的evbuffer_chain结构体
 	 * To unpack:
 	 *
 	 * The last_with_data chain is the last chain that has any data in it.
@@ -98,20 +100,31 @@ struct evbuffer {
 	 */
 	struct evbuffer_chain **last_with_datap;
 
-	/** Total amount of bytes stored in all chains.*/
+
+	/** 存储总数据 Total amount of bytes stored in all chains.*/
 	size_t total_len;
 
-	/** Number of bytes we have added to the buffer since we last tried to
-	 * invoke callbacks. */
+	/** 自上次回调以来增加的buffer 
+	 *  Number of bytes we have added to the buffer since we last tried to
+	 *  invoke callbacks. */
 	size_t n_add_for_cb;
-	/** Number of bytes we have removed from the buffer since we last
-	 * tried to invoke callbacks. */
+	
+	/** 自上次回调以来清空的buffer 
+	 *  Number of bytes we have removed from the buffer since we last
+	 *  tried to invoke callbacks. */
 	size_t n_del_for_cb;
 
+	/*多线程下保证线程安全的锁*/
 #ifndef EVENT__DISABLE_THREAD_SUPPORT
 	/** A lock used to mediate access to this buffer. */
 	void *lock;
 #endif
+
+	/* 标记位，分别作用于：
+	 * 1. 释放缓冲时是否解锁
+	 * 2. 是否允许缓冲区头、尾部的更改
+	 * 3. 是否在改变缓冲区时立刻相应回调函数
+	 */
 	/** True iff we should free the lock field when we free this
 	 * evbuffer. */
 	unsigned own_lock : 1;
@@ -127,31 +140,37 @@ struct evbuffer {
 	 * overflows when we have mutually recursive callbacks, and for
 	 * serializing callbacks in a single thread. */
 	unsigned deferred_cbs : 1;
+
+
+	/*用于IOCP的IO复用标记位*/
 #ifdef _WIN32
 	/** True iff this buffer is set up for overlapped IO. */
 	unsigned is_overlapped : 1;
 #endif
+
 	/** Zero or more EVBUFFER_FLAG_* bits */
 	ev_uint32_t flags;
 
-	/** Used to implement deferred callbacks. */
+	/** 对应于标记位回调函数不立刻响应 Used to implement deferred callbacks. */
 	struct event_base *cb_queue;
 
-	/** A reference count on this evbuffer.	 When the reference count
-	 * reaches 0, the buffer is destroyed.	Manipulated with
-	 * evbuffer_incref and evbuffer_decref_and_unlock and
-	 * evbuffer_free. */
+	/** 标记位，为0的时候清空bufffer 
+	 *  A reference count on this evbuffer.	 When the reference count
+	 *  reaches 0, the buffer is destroyed.	Manipulated with
+	 *  evbuffer_incref and evbuffer_decref_and_unlock and
+	 *  evbuffer_free. */
 	int refcnt;
 
-	/** A struct event_callback handle to make all of this buffer's callbacks
-	 * invoked from the event loop. */
+	/** 回调函数 A struct event_callback handle to make all of this buffer's callbacks
+	 *  invoked from the event loop. */
 	struct event_callback deferred;
 
 	/** A doubly-linked-list of callback functions */
 	LIST_HEAD(evbuffer_cb_queue, evbuffer_cb_entry) callbacks;
 
-	/** The parent bufferevent object this evbuffer belongs to.
-	 * NULL if the evbuffer stands alone. */
+	/** 涉及到bufferevent 结构体，后文详谈
+	 *  The parent bufferevent object this evbuffer belongs to.
+	 *  NULL if the evbuffer stands alone. */
 	struct bufferevent *parent;
 };
 
@@ -167,24 +186,25 @@ typedef ev_off_t ev_misalign_t;
 #endif
 #endif
 
-/** A single item in an evbuffer. */
+/** 缓冲区链表结构 A single item in an evbuffer. */
 struct evbuffer_chain {
 	/** points to next buffer in the chain */
 	struct evbuffer_chain *next;
 
-	/** total allocation available in the buffer field. */
+	/** 缓冲区长度 total allocation available in the buffer field. */
 	size_t buffer_len;
 
-	/** unused space at the beginning of buffer or an offset into a
+	/** 缓冲区空闲区域：用于发送buffer
+	 * unused space at the beginning of buffer or an offset into a
 	 * file for sendfile buffers. */
 	ev_misalign_t misalign;
 
-	/** Offset into buffer + misalign at which to start writing.
+	/** 偏移量 Offset into buffer + misalign at which to start writing.
 	 * In other words, the total number of bytes actually stored
 	 * in buffer. */
 	size_t off;
 
-	/** Set if special handling is required for this chain */
+	/** 标记位：Set if special handling is required for this chain */
 	unsigned flags;
 #define EVBUFFER_FILESEGMENT	0x0001  /**< A chain used for a file segment */
 #define EVBUFFER_SENDFILE	0x0002	/**< a chain used with sendfile */
@@ -201,10 +221,10 @@ struct evbuffer_chain {
 	/** a chain that is a referenced copy of another chain */
 #define EVBUFFER_MULTICAST	0x0080
 
-	/** number of references to this chain */
+	/** 对应于evbuffer中同名变量 number of references to this chain */
 	int refcnt;
 
-	/** Usually points to the read-write memory belonging to this
+	/** 真正的缓冲区 Usually points to the read-write memory belonging to this
 	 * buffer allocated as part of the evbuffer_chain allocation.
 	 * For mmap, this can be a read-only buffer and
 	 * EVBUFFER_IMMUTABLE will be set in flags.  For sendfile, it
