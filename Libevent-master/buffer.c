@@ -152,18 +152,26 @@ static int evbuffer_ptr_subtract(struct evbuffer *buf, struct evbuffer_ptr *pos,
 static int evbuffer_file_segment_materialize(struct evbuffer_file_segment *seg);
 static inline void evbuffer_chain_incref(struct evbuffer_chain *chain);
 
+/*新建链表项*/
 static struct evbuffer_chain *
 evbuffer_chain_new(size_t size)
 {
 	struct evbuffer_chain *chain;
 	size_t to_alloc;
 
+	/*异常检测*/
 	if (size > EVBUFFER_CHAIN_MAX - EVBUFFER_CHAIN_SIZE)
 		return (NULL);
 
+	/* 所需的大小size 再 加上evbuffer_chain结构体本身所需  
+     * 的内存大小。这样做的原因是，evbuffer_chain本身是管理  
+     * buffer的结构体。但buffer内存就分配在evbuffer_chain结构体存储  
+     * 内存的后面。所以要申请多一些内存。*/
 	size += EVBUFFER_CHAIN_SIZE;
 
-	/* get the next largest memory that can hold the buffer */
+	/* 获取最大内存：按512的倍数来
+	 * get the next largest memory that can hold the buffer 
+	 */
 	if (size < EVBUFFER_CHAIN_MAX / 2) {
 		to_alloc = MIN_BUFFER_SIZE;
 		while (to_alloc < size) {
@@ -173,12 +181,14 @@ evbuffer_chain_new(size_t size)
 		to_alloc = size;
 	}
 
-	/* we get everything in one chunk */
+	/* 分配内存 we get everything in one chunk */
 	if ((chain = mm_malloc(to_alloc)) == NULL)
 		return (NULL);
 
+	/*初始化*/
 	memset(chain, 0, EVBUFFER_CHAIN_SIZE);
 
+	/*缓冲区大小赋值*/
 	chain->buffer_len = to_alloc - EVBUFFER_CHAIN_SIZE;
 
 	/* this way we can manipulate the buffer to different addresses,
@@ -191,6 +201,7 @@ evbuffer_chain_new(size_t size)
 	return (chain);
 }
 
+/*释放缓冲链表*/
 static inline void
 evbuffer_chain_free(struct evbuffer_chain *chain)
 {
@@ -251,6 +262,7 @@ evbuffer_chain_free(struct evbuffer_chain *chain)
 	mm_free(chain);
 }
 
+/*全部释放*/
 static void
 evbuffer_free_all_chains(struct evbuffer_chain *chain)
 {
@@ -301,7 +313,7 @@ evbuffer_free_trailing_empty_chains(struct evbuffer *buf)
 	return ch;
 }
 
-/* Add a single chain 'chain' to the end of 'buf', freeing trailing empty
+/* 尾部插入 Add a single chain 'chain' to the end of 'buf', freeing trailing empty
  * chains as necessary.  Requires lock.  Does not schedule callbacks.
  */
 static void
@@ -309,6 +321,8 @@ evbuffer_chain_insert(struct evbuffer *buf,
     struct evbuffer_chain *chain)
 {
 	ASSERT_EVBUFFER_LOCKED(buf);
+	
+	/*若链表为空，则该chain既是头也是尾，否则在尾部插入*/
 	if (*buf->last_with_datap == NULL) {
 		/* There are no chains data on the buffer at all. */
 		EVUTIL_ASSERT(buf->last_with_datap == &buf->first);
@@ -325,6 +339,9 @@ evbuffer_chain_insert(struct evbuffer *buf,
 	buf->total_len += chain->off;
 }
 
+/* 1.调用new新建evbuffer_chain
+ * 2.调用insert出入链表
+ */
 static inline struct evbuffer_chain *
 evbuffer_chain_insert_new(struct evbuffer *buf, size_t datlen)
 {
@@ -357,15 +374,18 @@ evbuffer_chain_incref(struct evbuffer_chain *chain)
     ++chain->refcnt;
 }
 
+/*新建evbuffer*/
 struct evbuffer *
 evbuffer_new(void)
 {
 	struct evbuffer *buffer;
 
+	/*分配内存空间*/
 	buffer = mm_calloc(1, sizeof(struct evbuffer));
 	if (buffer == NULL)
 		return (NULL);
 
+	/*指针初始化*/
 	LIST_INIT(&buffer->callbacks);
 	buffer->refcnt = 1;
 	buffer->last_with_datap = &buffer->first;
@@ -1717,8 +1737,7 @@ done:
 
 #define EVBUFFER_CHAIN_MAX_AUTO_SIZE 4096
 
-/* Adds data to an event buffer */
-
+/* 向缓冲区添加数据 Adds data to an event buffer */
 int
 evbuffer_add(struct evbuffer *buf, const void *data_in, size_t datlen)
 {
@@ -1729,21 +1748,25 @@ evbuffer_add(struct evbuffer *buf, const void *data_in, size_t datlen)
 
 	EVBUFFER_LOCK(buf);
 
+	/*禁止尾部添加数据则直接跳转done*/
 	if (buf->freeze_end) {
 		goto done;
 	}
-	/* Prevent buf->total_len overflow */
+	
+	/* 异常处理：数据过多 Prevent buf->total_len overflow */
 	if (datlen > EV_SIZE_MAX - buf->total_len) {
 		goto done;
 	}
 
+	/*空链表则初始化*/
 	if (*buf->last_with_datap == NULL) {
 		chain = buf->last;
 	} else {
 		chain = *buf->last_with_datap;
 	}
 
-	/* If there are no chains allocated for this buffer, allocate one
+	/* 对空链表调用new和insert 
+	 * If there are no chains allocated for this buffer, allocate one
 	 * big enough to hold all the data. */
 	if (chain == NULL) {
 		chain = evbuffer_chain_new(datlen);
@@ -1752,10 +1775,15 @@ evbuffer_add(struct evbuffer *buf, const void *data_in, size_t datlen)
 		evbuffer_chain_insert(buf, chain);
 	}
 
+	/*EVBUFFER_IMMUTABLE 是 read-only chain, remain赋值0*/
 	if ((chain->flags & EVBUFFER_IMMUTABLE) == 0) {
 		/* Always true for mutable buffers */
 		EVUTIL_ASSERT(chain->misalign >= 0 &&
 		    (ev_uint64_t)chain->misalign <= EVBUFFER_CHAIN_MAX);
+
+		/* 计算可用空间，足够则拷贝数据完成add函数跳转out
+		 * 不够则尝试加上misalignment空间是否够，够则完成拷贝并跳转out
+		 */
 		remain = chain->buffer_len - (size_t)chain->misalign - chain->off;
 		if (remain >= datlen) {
 			/* there's enough space to hold all the data in the
@@ -1782,16 +1810,23 @@ evbuffer_add(struct evbuffer *buf, const void *data_in, size_t datlen)
 		remain = 0;
 	}
 
-	/* we need to add another chain */
+	/* 空间不足则需要增加chain
+	 * we need to add another chain 
+	 */
 	to_alloc = chain->buffer_len;
 	if (to_alloc <= EVBUFFER_CHAIN_MAX_AUTO_SIZE/2)
 		to_alloc <<= 1;
 	if (datlen > to_alloc)
 		to_alloc = datlen;
+	
+	/*新建链表项*/
 	tmp = evbuffer_chain_new(to_alloc);
 	if (tmp == NULL)
 		goto done;
 
+	/* 进入这里则表明是可写buffer并且可用空间不足，
+	 * 因此需要扩展链表，但是先填满链表最后那个节点
+	 */
 	if (remain) {
 		memcpy(chain->buffer + chain->misalign + chain->off,
 		    data, remain);
@@ -1803,6 +1838,7 @@ evbuffer_add(struct evbuffer *buf, const void *data_in, size_t datlen)
 	data += remain;
 	datlen -= remain;
 
+	/*填充数据，插入链表*/
 	memcpy(tmp->buffer, data, datlen);
 	tmp->off = datlen;
 	evbuffer_chain_insert(buf, tmp);
@@ -1816,6 +1852,7 @@ done:
 	return result;
 }
 
+/*链表前添加数据*/
 int
 evbuffer_prepend(struct evbuffer *buf, const void *data, size_t datlen)
 {
@@ -1824,15 +1861,18 @@ evbuffer_prepend(struct evbuffer *buf, const void *data, size_t datlen)
 
 	EVBUFFER_LOCK(buf);
 
+	/*链表首部无法修改则跳转done*/
 	if (buf->freeze_start) {
 		goto done;
 	}
+	/*数据过多则跳转至done*/
 	if (datlen > EV_SIZE_MAX - buf->total_len) {
 		goto done;
 	}
 
 	chain = buf->first;
 
+	/*空链表则执行new和insert*/
 	if (chain == NULL) {
 		chain = evbuffer_chain_new(datlen);
 		if (!chain)
@@ -1846,7 +1886,8 @@ evbuffer_prepend(struct evbuffer *buf, const void *data, size_t datlen)
 		EVUTIL_ASSERT(chain->misalign >= 0 &&
 		    (ev_uint64_t)chain->misalign <= EVBUFFER_CHAIN_MAX);
 
-		/* If this chain is empty, we can treat it as
+		/* 和尾部插入不同，这里首先是考虑在misalign中插入，即头部插入
+		 * If this chain is empty, we can treat it as
 		 * 'empty at the beginning' rather than 'empty at the end' */
 		if (chain->off == 0)
 			chain->misalign = chain->buffer_len;
@@ -1861,7 +1902,7 @@ evbuffer_prepend(struct evbuffer *buf, const void *data, size_t datlen)
 			buf->n_add_for_cb += datlen;
 			goto out;
 		} else if (chain->misalign) {
-			/* we can only fit some of the data. */
+			/* misalign只能放部分数据 we can only fit some of the data. */
 			memcpy(chain->buffer,
 			    (char*)data + datlen - chain->misalign,
 			    (size_t)chain->misalign);
@@ -1873,13 +1914,16 @@ evbuffer_prepend(struct evbuffer *buf, const void *data, size_t datlen)
 		}
 	}
 
-	/* we need to add another chain */
+	/* 增加新的链表项 we need to add another chain */
 	if ((tmp = evbuffer_chain_new(datlen)) == NULL)
 		goto done;
 	buf->first = tmp;
+
+	/*仅有一项，则头即是尾*/
 	if (buf->last_with_datap == &buf->first)
 		buf->last_with_datap = &tmp->next;
 
+	/*链表头部插入以及数据拷贝*/
 	tmp->next = chain;
 
 	tmp->off = datlen;
@@ -1922,7 +1966,8 @@ evbuffer_chain_should_realign(struct evbuffer_chain *chain,
 	    (chain->off <= MAX_TO_REALIGN_IN_EXPAND);
 }
 
-/* Expands the available space in the event buffer to at least datlen, all in
+/* 扩展ebuffer
+ * Expands the available space in the event buffer to at least datlen, all in
  * a single chunk.  Return that chunk. */
 static struct evbuffer_chain *
 evbuffer_expand_singlechain(struct evbuffer *buf, size_t datlen)
@@ -1933,7 +1978,10 @@ evbuffer_expand_singlechain(struct evbuffer *buf, size_t datlen)
 
 	chainp = buf->last_with_datap;
 
-	/* XXX If *chainp is no longer writeable, but has enough space in its
+	/* chainp指向最后一个有数据的链表项
+	 * 当最后一个有数据的evbuffer_chain还有空闲空间时  
+     * chainp就指向之。否则*chainp指向最后一个有数据的evbuffer_chain的next。
+	 * XXX If *chainp is no longer writeable, but has enough space in its
 	 * misalign, this might be a bad idea: we could still use *chainp, not
 	 * (*chainp)->next. */
 	if (*chainp && CHAIN_SPACE_LEN(*chainp) == 0)
@@ -1943,6 +1991,7 @@ evbuffer_expand_singlechain(struct evbuffer *buf, size_t datlen)
 	 * We will either use it, realign it, replace it, or resize it. */
 	chain = *chainp;
 
+	/*若不可修改则出入新的chain*/
 	if (chain == NULL ||
 	    (chain->flags & (EVBUFFER_IMMUTABLE|EVBUFFER_MEM_PINNED_ANY))) {
 		/* We can't use the last_with_data chain at all.  Just add a
@@ -1950,7 +1999,9 @@ evbuffer_expand_singlechain(struct evbuffer *buf, size_t datlen)
 		goto insert_new;
 	}
 
-	/* If we can fit all the data, then we don't have to do anything */
+	/* 若大小足够则不需要扩张
+	 * If we can fit all the data, then we don't have to do anything 
+	 */
 	if (CHAIN_SPACE_LEN(chain) >= datlen) {
 		result = chain;
 		goto ok;
@@ -1962,7 +2013,8 @@ evbuffer_expand_singlechain(struct evbuffer *buf, size_t datlen)
 		goto insert_new;
 	}
 
-	/* If the misalignment plus the remaining space fulfills our data
+	/* 预留空间够用，则使用misaligment空间而不需要扩张
+	 * If the misalignment plus the remaining space fulfills our data
 	 * needs, we could just force an alignment to happen.  Afterwards, we
 	 * have enough space.  But only do this if we're saving a lot of space
 	 * and not moving too much data.  Otherwise the space savings are
@@ -1974,13 +2026,19 @@ evbuffer_expand_singlechain(struct evbuffer *buf, size_t datlen)
 		goto ok;
 	}
 
-	/* At this point, we can either resize the last chunk with space in
+	/* 上述情况均不符合则一定要扩展空间了，这里提供了两个思路：
+	 * 1.重新在已有内存块上增加空间
+	 * 2.新申请一块空间
+	 * At this point, we can either resize the last chunk with space in
 	 * it, use the next chunk after it, or   If we add a new chunk, we waste
 	 * CHAIN_SPACE_LEN(chain) bytes in the former last chunk.  If we
 	 * resize, we have to copy chain->off bytes.
 	 */
 
-	/* Would expanding this chunk be affordable and worthwhile? */
+	/* 空闲空间小于总空间的1/8 或者已有的数据量大于MAX_TO_COPY_IN_EXPAND(4096)则选择方案2
+	 * 否则选择方案1
+	 * Would expanding this chunk be affordable and worthwhile? 
+	 */
 	if (CHAIN_SPACE_LEN(chain) < chain->buffer_len / 8 ||
 	    chain->off > MAX_TO_COPY_IN_EXPAND ||
 		datlen >= (EVBUFFER_CHAIN_MAX - chain->off)) {
@@ -2007,7 +2065,7 @@ evbuffer_expand_singlechain(struct evbuffer *buf, size_t datlen)
 		if (tmp == NULL)
 			goto err;
 
-		/* copy the data over that we had so far */
+		/* 数据迁移 copy the data over that we had so far */
 		tmp->off = chain->off;
 		memcpy(tmp->buffer, chain->buffer + chain->misalign,
 		    chain->off);
@@ -2034,7 +2092,8 @@ err:
 	return result;
 }
 
-/* Make sure that datlen bytes are available for writing in the last n
+/* 用最多不超过n个节点就提供datlen大小的空闲空间
+ * Make sure that datlen bytes are available for writing in the last n
  * chains.  Never copies or moves data. */
 int
 evbuffer_expand_fast_(struct evbuffer *buf, size_t datlen, int n)
@@ -2146,6 +2205,7 @@ evbuffer_expand_fast_(struct evbuffer *buf, size_t datlen, int n)
 	}
 }
 
+/*evbuffer扩展*/
 int
 evbuffer_expand(struct evbuffer *buf, size_t datlen)
 {
