@@ -157,7 +157,7 @@ static struct evbuffer_chain *
 evbuffer_chain_new(size_t size)
 {
 	struct evbuffer_chain *chain;
-	size_t to_alloc;
+	size_t to_alloc;evbuffer_ptr_set()
 
 	/*异常检测*/
 	if (size > EVBUFFER_CHAIN_MAX - EVBUFFER_CHAIN_SIZE)
@@ -1112,6 +1112,7 @@ done:
 	return result;
 }
 
+/*删除buffer*/
 int
 evbuffer_drain(struct evbuffer *buf, size_t len)
 {
@@ -1125,11 +1126,13 @@ evbuffer_drain(struct evbuffer *buf, size_t len)
 	if (old_len == 0)
 		goto done;
 
+	/*若头部不能修改则跳转done*/
 	if (buf->freeze_start) {
 		result = -1;
 		goto done;
 	}
 
+	/*要删除的大于已有的数据量，则直接删除evbuffer即可*/
 	if (len >= old_len && !HAS_PINNED_R(buf)) {
 		len = old_len;
 		for (chain = buf->first; chain != NULL; chain = next) {
@@ -1150,12 +1153,16 @@ evbuffer_drain(struct evbuffer *buf, size_t len)
 			next = chain->next;
 			remaining -= chain->off;
 
+			/*最后一个等于第一个*/
 			if (chain == *buf->last_with_datap) {
 				buf->last_with_datap = &buf->first;
 			}
+
+			/*倒数第二个*/
 			if (&chain->next == buf->last_with_datap)
 				buf->last_with_datap = &buf->first;
 
+			/*被固定无法删除的chain：跳过*/
 			if (CHAIN_PINNED_R(chain)) {
 				EVUTIL_ASSERT(remaining == 0);
 				chain->misalign += chain->off;
@@ -1172,7 +1179,9 @@ evbuffer_drain(struct evbuffer *buf, size_t len)
 	}
 
 	buf->n_del_for_cb += len;
-	/* Tell someone about changes in this buffer */
+	/* 调用回调函数
+	 * Tell someone about changes in this buffer 
+	 */
 	evbuffer_invoke_callbacks_(buf);
 
 done:
@@ -1186,6 +1195,7 @@ evbuffer_remove(struct evbuffer *buf, void *data_out, size_t datlen)
 {
 	ev_ssize_t n;
 	EVBUFFER_LOCK(buf);
+	/*复制数据之后删除而不是直接删除*/
 	n = evbuffer_copyout_from(buf, NULL, data_out, datlen);
 	if (n > 0) {
 		if (evbuffer_drain(buf, n)<0)
@@ -1195,6 +1205,7 @@ evbuffer_remove(struct evbuffer *buf, void *data_out, size_t datlen)
 	return (int)n;
 }
 
+/*复制evbuffer*/
 ev_ssize_t
 evbuffer_copyout(struct evbuffer *buf, void *data_out, size_t datlen)
 {
@@ -1214,7 +1225,9 @@ evbuffer_copyout_from(struct evbuffer *buf, const struct evbuffer_ptr *pos,
 
 	EVBUFFER_LOCK(buf);
 
+	/*pos是开始复制的位置的指针，为NULL则从头复制*/
 	if (pos) {
+		/*需要数据过多，无法复制*/
 		if (datlen > (size_t)(EV_SSIZE_MAX - pos->pos)) {
 			result = -1;
 			goto done;
@@ -1231,9 +1244,11 @@ evbuffer_copyout_from(struct evbuffer *buf, const struct evbuffer_ptr *pos,
 	}
 
 
+	/*没有数据则返回*/
 	if (datlen == 0)
 		goto done;
 
+	/*禁止从头复制则失败*/
 	if (buf->freeze_start) {
 		result = -1;
 		goto done;
@@ -1241,6 +1256,7 @@ evbuffer_copyout_from(struct evbuffer *buf, const struct evbuffer_ptr *pos,
 
 	nread = datlen;
 
+	/*将数据复制入data中*/
 	while (datlen && datlen >= chain->off - pos_in_chain) {
 		size_t copylen = chain->off - pos_in_chain;
 		memcpy(data,
@@ -1256,19 +1272,21 @@ evbuffer_copyout_from(struct evbuffer *buf, const struct evbuffer_ptr *pos,
 
 	if (datlen) {
 		EVUTIL_ASSERT(chain);
-		EVUTIL_ASSERT(datlen+pos_in_chain <= chain->off);
+		EVUTIL_ASSERT(datlen + pos_in_chain <= chain->off);
 
 		memcpy(data, chain->buffer + chain->misalign + pos_in_chain,
 		    datlen);
 	}
 
+	/*返回读的字节数*/
 	result = nread;
 done:
 	EVBUFFER_UNLOCK(buf);
 	return result;
 }
 
-/* reads data from the src buffer to the dst buffer, avoids memcpy as
+/* 直接从src读数据到dst，减少memcpy
+ * reads data from the src buffer to the dst buffer, avoids memcpy as
  * possible. */
 /*  XXXX should return ev_ssize_t */
 int
@@ -1286,25 +1304,32 @@ evbuffer_remove_buffer(struct evbuffer *src, struct evbuffer *dst,
 
 	chain = previous = src->first;
 
+	/*没有数据或者源buffer和目的buffer相同自然不需要拷贝*/
 	if (datlen == 0 || dst == src) {
 		result = 0;
 		goto done;
 	}
 
+	/*源buffer的头部禁止修改或目的buffer尾部禁止修改则返回*/
 	if (dst->freeze_end || src->freeze_start) {
 		result = -1;
 		goto done;
 	}
 
-	/* short-cut if there is no more data buffered */
+	/* 要读的数据超过了总数据量则读总数据量的数据并跳转done
+	 * short-cut if there is no more data buffered 
+	 */
 	if (datlen >= src->total_len) {
 		datlen = src->total_len;
+		/*调用该函数实现数据的复制而不使用memcpy*/
 		evbuffer_add_buffer(dst, src);
 		result = (int)datlen; /*XXXX should return ev_ssize_t*/
 		goto done;
 	}
 
-	/* removes chains if possible */
+	/* 累计需要读的nread，用于remove链表
+	 * removes chains if possible 
+	 */
 	while (chain->off <= datlen) {
 		/* We can't remove the last with data from src unless we
 		 * remove all chains, in which case we would have done the if
@@ -1318,6 +1343,7 @@ evbuffer_remove_buffer(struct evbuffer *src, struct evbuffer *dst,
 		chain = chain->next;
 	}
 
+	/*复制给dst*/
 	if (nread) {
 		/* we can remove the chain */
 		struct evbuffer_chain **chp;
@@ -1337,7 +1363,8 @@ evbuffer_remove_buffer(struct evbuffer *src, struct evbuffer *dst,
 		dst->n_add_for_cb += nread;
 	}
 
-	/* we know that there is more data in the src buffer than
+	/* 数据存储到dst
+	 * we know that there is more data in the src buffer than
 	 * we want to read, so we manually drain the chain */
 	evbuffer_add(dst, chain->buffer + chain->misalign, datlen);
 	chain->misalign += datlen;
@@ -2103,8 +2130,10 @@ evbuffer_expand_fast_(struct evbuffer *buf, size_t datlen, int n)
 	int used;
 
 	ASSERT_EVBUFFER_LOCKED(buf);
+	/*要求n大于等于2*/
 	EVUTIL_ASSERT(n >= 2);
 
+	/*若链表为空或者不可修改，则直接新建链表并插入*/
 	if (chain == NULL || (chain->flags & EVBUFFER_IMMUTABLE)) {
 		/* There is no last chunk, or we can't touch the last chunk.
 		 * Just add a new chunk. */
@@ -2122,6 +2151,7 @@ evbuffer_expand_fast_(struct evbuffer *buf, size_t datlen, int n)
 	 * over the chains at the end of the buffer, tring to see how much
 	 * space we have in the first n. */
 	for (chain = *buf->last_with_datap; chain; chain = chain->next) {
+		/*先试用已有链表项剩余空间*/
 		if (chain->off) {
 			size_t space = (size_t) CHAIN_SPACE_LEN(chain);
 			EVUTIL_ASSERT(chain == *buf->last_with_datap);
@@ -2143,7 +2173,9 @@ evbuffer_expand_fast_(struct evbuffer *buf, size_t datlen, int n)
 			break;
 	}
 
-	/* There wasn't enough space in the first n chains with space in
+	/* 运行到这里时，就说明还没找到空闲空间。一般是因为链表后面的off等于0  
+     * 的节点已经被用完了都还不能满足datlen
+     * There wasn't enough space in the first n chains with space in
 	 * them. Either add a new chain with enough space, or replace all
 	 * empty chains with one that has enough space, depending on n. */
 	if (used < n) {
@@ -2162,7 +2194,10 @@ evbuffer_expand_fast_(struct evbuffer *buf, size_t datlen, int n)
 		 * just allocated a new chain earlier) */
 		return (0);
 	} else {
-		/* Nuke _all_ the empty chains. */
+		
+		/* 不能完成n次任务，则删除已有链表，新建链表
+		 * Nuke _all_ the empty chains. 
+		 */
 		int rmv_all = 0; /* True iff we removed last_with_data. */
 		chain = *buf->last_with_datap;
 		if (!chain->off) {
@@ -2176,13 +2211,16 @@ evbuffer_expand_fast_(struct evbuffer *buf, size_t datlen, int n)
 			chain = chain->next;
 		}
 
-
+		/*删除全部*/
 		for (; chain; chain = next) {
 			next = chain->next;
 			EVUTIL_ASSERT(chain->off == 0);
 			evbuffer_chain_free(chain);
 		}
+		
 		EVUTIL_ASSERT(datlen >= avail);
+
+		/*新建链表：降低长度，扩大大小*/
 		tmp = evbuffer_chain_new(datlen - avail);
 		if (tmp == NULL) {
 			if (rmv_all) {
@@ -2666,6 +2704,15 @@ evbuffer_ptr_subtract(struct evbuffer *buf, struct evbuffer_ptr *pos,
 	}
 }
 
+ /* 给evbuffer_ptr赋值
+  * 两种使用方式：
+  *（1）  evbuffer_ptr_set(buf, &pos, N, EVBUFFER_PTR_SET)
+  *		从buffer开始设置第N位为pos指向的位置  
+  *（2）  evbuffer_ptr_set(buf, &pos, N, EVBUFFER_PTR_ADD)
+  * 	向前N位，指向pos
+  *
+  *  对于未初始化的evbuffer_ptr只能用第一种
+  */
 int
 evbuffer_ptr_set(struct evbuffer *buf, struct evbuffer_ptr *pos,
     size_t position, enum evbuffer_ptr_how how)
@@ -2676,6 +2723,9 @@ evbuffer_ptr_set(struct evbuffer *buf, struct evbuffer_ptr *pos,
 
 	EVBUFFER_LOCK(buf);
 
+	/* 这里注意两种how的不同在于一个是pos = position
+	 * 另一个是pos = postion + pos，即从pos开始数position位置
+	 */
 	switch (how) {
 	case EVBUFFER_PTR_SET:
 		chain = buf->first;

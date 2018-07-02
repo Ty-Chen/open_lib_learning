@@ -101,6 +101,8 @@ struct evbuffer
 ;
 
 /**
+    指向buffer中指定位置，可以快速的浏览而不需要反复超找
+    修改evbuffer会导致其失效
     Pointer to a position within an evbuffer.
 
     Used when repeatedly searching through a buffer.  Calling any function
