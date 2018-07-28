@@ -2659,6 +2659,7 @@ evbuffer_write(struct evbuffer *buffer, evutil_socket_t fd)
 	return evbuffer_write_atmost(buffer, fd, -1);
 }
 
+/*查找函数*/
 unsigned char *
 evbuffer_find(struct evbuffer *buffer, const unsigned char *what, size_t len)
 {
@@ -2814,6 +2815,7 @@ evbuffer_search(struct evbuffer *buffer, const char *what, size_t len, const str
 	return evbuffer_search_range(buffer, what, len, start, NULL);
 }
 
+/*查找函数，指明范围*/
 struct evbuffer_ptr
 evbuffer_search_range(struct evbuffer *buffer, const char *what, size_t len, const struct evbuffer_ptr *start, const struct evbuffer_ptr *end)
 {
@@ -2824,6 +2826,7 @@ evbuffer_search_range(struct evbuffer *buffer, const char *what, size_t len, con
 
 	EVBUFFER_LOCK(buffer);
 
+	/*start和end指明了查找的范围*/
 	if (start) {
 		memcpy(&pos, start, sizeof(pos));
 		chain = pos.internal_.chain;
@@ -2841,16 +2844,28 @@ evbuffer_search_range(struct evbuffer *buffer, const char *what, size_t len, con
 
 	first = what[0];
 
+	/*根据start和end赋值得到的evbuffer_chain进行查找*/
 	while (chain) {
 		const unsigned char *start_at =
 		    chain->buffer + chain->misalign +
 		    pos.internal_.pos_in_chain;
+
+		/* const void * memchr ( const void * ptr, int value, size_t num );
+		 * 函数的作用是:在ptr指向的内存块中(长度为num个字节),需找字符value。
+		 * 如果找到就返回对应的位置，找不到返回NULL
+		 */
 		p = memchr(start_at, first,
 		    chain->off - pos.internal_.pos_in_chain);
 		if (p) {
+			//pos指向了这个chain中出现等于what[0]字符的位置
+ 
 			pos.pos += p - start_at;
 			pos.internal_.pos_in_chain += p - start_at;
+
+			//evbuffer_ptr_memcmp比较整个字符串。如果有需要的话，该函数会跨
+			//evbuffer_chain进行比较，但不会修改pos。如果成功匹配，那么返回0			
 			if (!evbuffer_ptr_memcmp(buffer, &pos, what, len)) {
+				//end之后的就算找到了也算是失败
 				if (end && pos.pos + (ev_ssize_t)len > end->pos)
 					goto not_found;
 				else
@@ -2858,6 +2873,7 @@ evbuffer_search_range(struct evbuffer *buffer, const char *what, size_t len, con
 			}
 			++pos.pos;
 			++pos.internal_.pos_in_chain;
+			//找完了也没找到
 			if (pos.internal_.pos_in_chain == chain->off) {
 				chain = pos.internal_.chain = chain->next;
 				pos.internal_.pos_in_chain = 0;
@@ -2865,6 +2881,7 @@ evbuffer_search_range(struct evbuffer *buffer, const char *what, size_t len, con
 		} else {
 			if (chain == last_chain)
 				goto not_found;
+			/*在下一个evbuffer_chain寻找*/
 			pos.pos += chain->off - pos.internal_.pos_in_chain;
 			chain = pos.internal_.chain = chain->next;
 			pos.internal_.pos_in_chain = 0;
