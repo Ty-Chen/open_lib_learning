@@ -59,7 +59,7 @@ struct event_watermark {
 	size_t high;
 };
 
-/**
+/** bufferevent结构体
   Shared implementation of a bufferevent.
 
   This type is exposed only because it was exposed in previous versions,
@@ -70,25 +70,35 @@ struct event_watermark {
 struct bufferevent {
 	/** Event base for which this bufferevent was created. */
 	struct event_base *ev_base;
+	
 	/** Pointer to a table of function pointers to set up how this
 	    bufferevent behaves. */
 	const struct bufferevent_ops *be_ops;
 
-	/** A read event that triggers when a timeout has happened or a socket
-	    is ready to read data.  Only used by some subtypes of
-	    bufferevent. */
+	/** 读事件：超时或socket可读
+	 *  A read event that triggers when a timeout has happened or a socket
+	 *  is ready to read data.  Only used by some subtypes of
+	 *  bufferevent. 
+	 */
 	struct event ev_read;
-	/** A write event that triggers when a timeout has happened or a socket
-	    is ready to write data.  Only used by some subtypes of
-	    bufferevent. */
+	
+	/** 写事件：超时或socket可写
+	 *  A write event that triggers when a timeout has happened or a socket
+	 *  is ready to write data.  Only used by some subtypes of
+	 *  bufferevent. 
+	 */
 	struct event ev_write;
 
-	/** An input buffer. Only the bufferevent is allowed to add data to
-	    this buffer, though the user is allowed to drain it. */
+	/** 输入evbuffer
+	 *  An input buffer. Only the bufferevent is allowed to add data to
+	 *  this buffer, though the user is allowed to drain it. 
+	 */
 	struct evbuffer *input;
 
-	/** An input buffer. Only the bufferevent is allowed to drain data
-	    from this buffer, though the user is allowed to add it. */
+	/** 输出evbuffer
+	 *  An input buffer. Only the bufferevent is allowed to drain data
+	 *  from this buffer, though the user is allowed to add it. 
+	 */
 	struct evbuffer *output;
 
 	struct event_watermark wm_read;
