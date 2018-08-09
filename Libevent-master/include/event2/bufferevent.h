@@ -155,15 +155,18 @@ typedef void (*bufferevent_event_cb)(struct bufferevent *bev, short what, void *
 
 /** Options that can be specified when creating a bufferevent */
 enum bufferevent_options {
-	/** If set, we close the underlying file
-	 * descriptor/bufferevent/whatever when this bufferevent is freed. */
+	/** free bufferevent的时候释放文件描述符
+	 *  If set, we close the underlying file
+	 *  descriptor/bufferevent/whatever when this bufferevent is freed. */
 	BEV_OPT_CLOSE_ON_FREE = (1<<0),
 
-	/** If set, and threading is enabled, operations on this bufferevent
-	 * are protected by a lock */
+	/** 线程安全选项
+	 *  If set, and threading is enabled, operations on this bufferevent
+	 *  are protected by a lock */
 	BEV_OPT_THREADSAFE = (1<<1),
 
-	/** If set, callbacks are run deferred in the event loop. */
+	/** 延迟回调选项
+	 *  If set, callbacks are run deferred in the event loop. */
 	BEV_OPT_DEFER_CALLBACKS = (1<<2),
 
 	/** If set, callbacks are executed without locks being held on the
@@ -174,6 +177,7 @@ enum bufferevent_options {
 };
 
 /**
+  根据已有套接字创建新的套接字bufferevent
   Create a new socket bufferevent over an existing socket.
 
   @param base the event base to associate with the new bufferevent.
@@ -190,6 +194,7 @@ EVENT2_EXPORT_SYMBOL
 struct bufferevent *bufferevent_socket_new(struct event_base *base, evutil_socket_t fd, int options);
 
 /**
+   套接字connect的bufferevent封装
    Launch a connect() attempt with a socket-based bufferevent.
 
    When the connect succeeds, the eventcb will be invoked with
@@ -212,7 +217,7 @@ EVENT2_EXPORT_SYMBOL
 int bufferevent_socket_connect(struct bufferevent *, const struct sockaddr *, int);
 
 struct evdns_base;
-/**
+/** 解析URL并连接
    Resolve the hostname 'hostname' and connect to it as with
    bufferevent_socket_connect().
 

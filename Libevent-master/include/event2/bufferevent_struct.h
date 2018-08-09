@@ -101,9 +101,11 @@ struct bufferevent {
 	 */
 	struct evbuffer *output;
 
+	/*event水印*/
 	struct event_watermark wm_read;
 	struct event_watermark wm_write;
 
+	/*读写回调函数*/
 	bufferevent_data_cb readcb;
 	bufferevent_data_cb writecb;
 	/* This should be called 'eventcb', but renaming it would break
