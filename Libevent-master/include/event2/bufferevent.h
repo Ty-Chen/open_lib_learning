@@ -259,6 +259,7 @@ EVENT2_EXPORT_SYMBOL
 int bufferevent_socket_get_dns_error(struct bufferevent *bev);
 
 /**
+  分配bufferevent到指定的event_base
   Assign a bufferevent to a specific event_base.
 
   NOTE that only socket bufferevents support this function.
@@ -279,6 +280,7 @@ EVENT2_EXPORT_SYMBOL
 struct event_base *bufferevent_get_base(struct bufferevent *bev);
 
 /**
+  优先级设定
   Assign a priority to a bufferevent.
 
   Only supported for socket bufferevents.
