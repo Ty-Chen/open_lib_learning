@@ -49,6 +49,8 @@
 
 #define MAX_WSABUFS 16
 
+/*IOCP天生更适合proactor，看看这里怎么转化为reactor*/
+
 /** An evbuffer that can handle overlapped IO. */
 struct evbuffer_overlapped {
 	struct evbuffer buffer;
