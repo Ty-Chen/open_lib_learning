@@ -1,4 +1,5 @@
 /*
+  简单的TCP服务器，监听TCP连接并回复消息 "hello, world"
   This example program provides a trivial server program that listens for TCP
   connections on port 9995.  When they arrive, it writes a short message to
   each client connection, and closes each connection once it is flushed.
@@ -48,6 +49,7 @@ main(int argc, char **argv)
 	WSAStartup(0x0201, &wsa_data);
 #endif
 
+	/*添加基本事件堆*/
 	base = event_base_new();
 	if (!base) {
 		fprintf(stderr, "Could not initialize libevent!\n");
@@ -58,6 +60,7 @@ main(int argc, char **argv)
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(PORT);
 
+	/*创建监听套接字*/
 	listener = evconnlistener_new_bind(base, listener_cb, (void *)base,
 	    LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1,
 	    (struct sockaddr*)&sin,
@@ -68,15 +71,19 @@ main(int argc, char **argv)
 		return 1;
 	}
 
+	/*创建信号事件*/
 	signal_event = evsignal_new(base, SIGINT, signal_cb, (void *)base);
 
+	/*将事件添加到事件堆*/
 	if (!signal_event || event_add(signal_event, NULL)<0) {
 		fprintf(stderr, "Could not create/add a signal event!\n");
 		return 1;
 	}
 
+	/*分发事件，核心是event_base_loop*/
 	event_base_dispatch(base);
 
+	/*结束后释放资源*/
 	evconnlistener_free(listener);
 	event_free(signal_event);
 	event_base_free(base);

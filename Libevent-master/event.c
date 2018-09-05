@@ -1938,7 +1938,7 @@ event_base_loop(struct event_base *base, int flags)
 	 * as we invoke user callbacks. */
 	EVBASE_ACQUIRE_LOCK(base, th_base_lock);
 
-	/*异常检测*/
+	/*异常检测，已开启loop不能再开启第二次*/
 	if (base->running_loop) {
 		event_warnx("%s: reentrant invocation.  Only one event_base_loop"
 		    " can run on each event_base at once.", __func__);
