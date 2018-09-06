@@ -159,6 +159,7 @@ evconnlistener_new(struct event_base *base,
 {
 	struct evconnlistener_event *lev;
 
+/*针对IOCP使用async，将listener和后续的accept添加进入IOCP的异步IO中*/
 #ifdef _WIN32
 	if (base && event_base_get_iocp_(base)) {
 		const struct win32_extension_fns *ext =
@@ -169,6 +170,7 @@ evconnlistener_new(struct event_base *base,
 	}
 #endif
 
+	/*调用listen开启监听*/
 	if (backlog > 0) {
 		if (listen(fd, backlog) < 0)
 			return NULL;
@@ -197,6 +199,7 @@ evconnlistener_new(struct event_base *base,
 		EVTHREAD_ALLOC_LOCK(lev->base.lock, EVTHREAD_LOCKTYPE_RECURSIVE);
 	}
 
+	/*将listen事件和对应的回调函数联系起来，在cb中完成accept*/
 	event_assign(&lev->listener, base, fd, EV_READ|EV_PERSIST,
 	    listener_read_cb, lev);
 
@@ -223,6 +226,7 @@ evconnlistener_new_bind(struct event_base *base, evconnlistener_cb cb,
 	if (flags & LEV_OPT_CLOSE_ON_EXEC)
 		socktype |= EVUTIL_SOCK_CLOEXEC;
 
+	/*创建套接字*/
 	fd = evutil_socket_(family, socktype, 0);
 	if (fd == -1)
 		return NULL;
@@ -245,11 +249,13 @@ evconnlistener_new_bind(struct event_base *base, evconnlistener_cb cb,
 			goto err;
 	}
 
+	/*调用bind*/
 	if (sa) {
 		if (bind(fd, sa, socklen)<0)
 			goto err;
 	}
 
+	/*调用evconnlistener_new函数*/
 	listener = evconnlistener_new(base, cb, ptr, flags, backlog, fd);
 	if (!listener)
 		goto err;

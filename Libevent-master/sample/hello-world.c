@@ -80,7 +80,7 @@ main(int argc, char **argv)
 		return 1;
 	}
 
-	/*分发事件，核心是event_base_loop*/
+	/*分发事件，核心是event_base_loop，循环中检测事件是否发生，发生则按照设定好的cb响应*/
 	event_base_dispatch(base);
 
 	/*结束后释放资源*/
@@ -92,6 +92,7 @@ main(int argc, char **argv)
 	return 0;
 }
 
+/*监听回调函数，负责创建套接字、设置写、连接回调*/
 static void
 listener_cb(struct evconnlistener *listener, evutil_socket_t fd,
     struct sockaddr *sa, int socklen, void *user_data)
@@ -105,10 +106,12 @@ listener_cb(struct evconnlistener *listener, evutil_socket_t fd,
 		event_base_loopbreak(base);
 		return;
 	}
+	/*设置写数据和连接事件回调*/
 	bufferevent_setcb(bev, NULL, conn_writecb, conn_eventcb, NULL);
 	bufferevent_enable(bev, EV_WRITE);
 	bufferevent_disable(bev, EV_READ);
 
+	/*写套接字*/
 	bufferevent_write(bev, MESSAGE, strlen(MESSAGE));
 }
 
