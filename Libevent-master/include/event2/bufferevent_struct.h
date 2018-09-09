@@ -59,7 +59,7 @@ struct event_watermark {
 	size_t high;
 };
 
-/** bufferevent结构体
+/** bufferevent结构体，按设计不应对外暴露的结构体
   Shared implementation of a bufferevent.
 
   This type is exposed only because it was exposed in previous versions,

@@ -115,6 +115,7 @@ listener_cb(struct evconnlistener *listener, evutil_socket_t fd,
 	bufferevent_write(bev, MESSAGE, strlen(MESSAGE));
 }
 
+/*写事件回调*/
 static void
 conn_writecb(struct bufferevent *bev, void *user_data)
 {
@@ -128,13 +129,16 @@ conn_writecb(struct bufferevent *bev, void *user_data)
 static void
 conn_eventcb(struct bufferevent *bev, short events, void *user_data)
 {
+	/*文件结束或者出错则打印信息，并释放资源*/
 	if (events & BEV_EVENT_EOF) {
 		printf("Connection closed.\n");
 	} else if (events & BEV_EVENT_ERROR) {
 		printf("Got an error on the connection: %s\n",
 		    strerror(errno));/*XXX win32*/
 	}
-	/* None of the other events can happen here, since we haven't enabled
+	
+	/* 超时也会触发
+	 * None of the other events can happen here, since we haven't enabled
 	 * timeouts */
 	bufferevent_free(bev);
 }

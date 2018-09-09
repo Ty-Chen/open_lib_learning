@@ -44,6 +44,7 @@ signal_cb(evutil_socket_t fd, short event, void *arg)
 int
 main(int argc, char **argv)
 {
+	/*新建事件和事件库*/
 	struct event *signal_int;
 	struct event_base* base;
 #ifdef _WIN32
@@ -55,15 +56,20 @@ main(int argc, char **argv)
 	(void) WSAStartup(wVersionRequested, &wsaData);
 #endif
 
-	/* Initalize the event library */
+	/* 初始化事件库
+	 * Initalize the event library */
 	base = event_base_new();
 
-	/* Initalize one event */
+	/* 初始化信号事件Initalize one event */
 	signal_int = evsignal_new(base, SIGINT, signal_cb, event_self_cbarg());
 
+	/*添加事件*/
 	event_add(signal_int, NULL);
 
+	/*分发事件*/
 	event_base_dispatch(base);
+
+	/*释放资源*/
 	event_free(signal_int);
 	event_base_free(base);
 
