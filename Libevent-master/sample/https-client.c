@@ -129,7 +129,7 @@ err_openssl(const char *func)
 }
 
 #ifndef _WIN32
-/* See http://archives.seul.org/libevent/users/Jan-2013/msg00039.html */
+/* 证书确认See http://archives.seul.org/libevent/users/Jan-2013/msg00039.html */
 static int cert_verify_callback(X509_STORE_CTX *x509_ctx, void *arg)
 {
 	char cert_str[256];

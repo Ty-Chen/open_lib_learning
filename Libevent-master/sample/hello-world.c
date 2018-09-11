@@ -49,7 +49,7 @@ main(int argc, char **argv)
 	WSAStartup(0x0201, &wsa_data);
 #endif
 
-	/*添加基本事件堆*/
+	/*添加基本事件库*/
 	base = event_base_new();
 	if (!base) {
 		fprintf(stderr, "Could not initialize libevent!\n");
