@@ -219,6 +219,7 @@ main(int argc, char **argv)
 	int ret = 0;
 	enum { HTTP, HTTPS } type = HTTP;
 
+	/*输入检测*/
 	for (i = 1; i < argc; i++) {
 		if (!strcmp("-url", argv[i])) {
 			if (i < argc - 1) {
@@ -263,6 +264,7 @@ main(int argc, char **argv)
 		}
 	}
 
+	/*url检测*/
 	if (!url) {
 		syntax();
 		goto error;
@@ -284,12 +286,14 @@ main(int argc, char **argv)
 	}
 #endif // _WIN32
 
+	/*URL解析*/
 	http_uri = evhttp_uri_parse(url);
 	if (http_uri == NULL) {
 		err("malformed url");
 		goto error;
 	}
 
+	/*判断http还是https*/
 	scheme = evhttp_uri_get_scheme(http_uri);
 	if (scheme == NULL || (strcasecmp(scheme, "https") != 0 &&
 	                       strcasecmp(scheme, "http") != 0)) {
@@ -297,22 +301,26 @@ main(int argc, char **argv)
 		goto error;
 	}
 
+	/*主机*/
 	host = evhttp_uri_get_host(http_uri);
 	if (host == NULL) {
 		err("url must have a host");
 		goto error;
 	}
 
+	/*端口*/
 	port = evhttp_uri_get_port(http_uri);
 	if (port == -1) {
 		port = (strcasecmp(scheme, "http") == 0) ? 80 : 443;
 	}
 
+	/*路径*/
 	path = evhttp_uri_get_path(http_uri);
 	if (strlen(path) == 0) {
 		path = "/";
 	}
 
+	/*请求类型*/
 	query = evhttp_uri_get_query(http_uri);
 	if (query == NULL) {
 		snprintf(uri, sizeof(uri) - 1, "%s", path);
@@ -321,6 +329,7 @@ main(int argc, char **argv)
 	}
 	uri[sizeof(uri) - 1] = '\0';
 
+	/*SSL初始化*/
 #if (OPENSSL_VERSION_NUMBER < 0x10100000L) || \
 	(defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x20700000L)
 	// Initialize OpenSSL
