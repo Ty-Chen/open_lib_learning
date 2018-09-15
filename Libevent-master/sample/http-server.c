@@ -105,7 +105,8 @@ not_found:
 	return "application/misc";
 }
 
-/* Callback used for the /dump URI, and for every non-GET request:
+/* 回复请求
+ * Callback used for the /dump URI, and for every non-GET request:
  * dumps all information to stdout and gives back a trivial 200 ok */
 static void
 dump_request_cb(struct evhttp_request *req, void *arg)
