@@ -39,6 +39,7 @@
 #include "sds.h"
 #include "sdsalloc.h"
 
+/*返回sdshdr大小*/
 static inline int sdsHdrSize(char type) {
     switch(type&SDS_TYPE_MASK) {
         case SDS_TYPE_5:
@@ -55,6 +56,7 @@ static inline int sdsHdrSize(char type) {
     return 0;
 }
 
+/*根据size返回sds的类型*/
 static inline char sdsReqType(size_t string_size) {
     if (string_size < 1<<5)
         return SDS_TYPE_5;
@@ -69,7 +71,8 @@ static inline char sdsReqType(size_t string_size) {
     return SDS_TYPE_64;
 }
 
-/* Create a new sds string with the content specified by the 'init' pointer
+/* 初始化函数
+ * Create a new sds string with the content specified by the 'init' pointer
  * and 'initlen'.
  * If NULL is used for 'init' the string is initialized with zero bytes.
  *
