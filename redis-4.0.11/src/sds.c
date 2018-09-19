@@ -87,17 +87,23 @@ static inline char sdsReqType(size_t string_size) {
 sds sdsnewlen(const void *init, size_t initlen) {
     void *sh;
     sds s;
+	/*根据initlen返回type*/
     char type = sdsReqType(initlen);
     /* Empty strings are usually created in order to append. Use type 8
      * since type 5 is not good at this. */
     if (type == SDS_TYPE_5 && initlen == 0) type = SDS_TYPE_8;
+	/*hdrlen赋值为sds的size*/
     int hdrlen = sdsHdrSize(type);
     unsigned char *fp; /* flags pointer. */
 
+	/*分配空间*/
     sh = s_malloc(hdrlen+initlen+1);
     if (!init)
         memset(sh, 0, hdrlen+initlen+1);
+
+	/*错误返回*/
     if (sh == NULL) return NULL;
+	/*s指向数据，fp为首指针前一位，指向flag，存储type*/
     s = (char*)sh+hdrlen;
     fp = ((unsigned char*)s)-1;
     switch(type) {
@@ -140,30 +146,38 @@ sds sdsnewlen(const void *init, size_t initlen) {
     return s;
 }
 
-/* Create an empty (zero length) sds string. Even in this case the string
+/* 创建空sds
+ * Create an empty (zero length) sds string. Even in this case the string
  * always has an implicit null term. */
 sds sdsempty(void) {
     return sdsnewlen("",0);
 }
 
-/* Create a new sds string starting from a null terminated C string. */
+/* 创建新sds
+ * Create a new sds string starting from a null terminated C string. 
+ */
 sds sdsnew(const char *init) {
     size_t initlen = (init == NULL) ? 0 : strlen(init);
     return sdsnewlen(init, initlen);
 }
 
-/* Duplicate an sds string. */
+/* 复制sds
+ * Duplicate an sds string. 
+ */
 sds sdsdup(const sds s) {
     return sdsnewlen(s, sdslen(s));
 }
 
-/* Free an sds string. No operation is performed if 's' is NULL. */
+/* 释放sds
+ * Free an sds string. No operation is performed if 's' is NULL. 
+ */
 void sdsfree(sds s) {
     if (s == NULL) return;
     s_free((char*)s-sdsHdrSize(s[-1]));
 }
 
-/* Set the sds string length to the length as obtained with strlen(), so
+/* 当sds数据变化后，调用该函数更新sds长度
+ * Set the sds string length to the length as obtained with strlen(), so
  * considering as content only up to the first null term character.
  *
  * This function is useful when the sds string is hacked manually in some
@@ -182,7 +196,8 @@ void sdsupdatelen(sds s) {
     sdssetlen(s, reallen);
 }
 
-/* Modify an sds string in-place to make it empty (zero length).
+/* 清空sds
+ * Modify an sds string in-place to make it empty (zero length).
  * However all the existing buffer is not discarded but set as free space
  * so that next append operations will not require allocations up to the
  * number of bytes previously available. */
@@ -191,12 +206,14 @@ void sdsclear(sds s) {
     s[0] = '\0';
 }
 
-/* Enlarge the free space at the end of the sds string so that the caller
+/* sds扩容
+ * Enlarge the free space at the end of the sds string so that the caller
  * is sure that after calling this function can overwrite up to addlen
  * bytes after the end of the string, plus one more byte for nul term.
  *
  * Note: this does not change the *length* of the sds string as returned
- * by sdslen(), but only the free buffer space we have. */
+ * by sdslen(), but only the free buffer space we have. 
+ */
 sds sdsMakeRoomFor(sds s, size_t addlen) {
     void *sh, *newsh;
     size_t avail = sdsavail(s);
@@ -204,7 +221,9 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {
     char type, oldtype = s[-1] & SDS_TYPE_MASK;
     int hdrlen;
 
-    /* Return ASAP if there is enough space left. */
+    /* 可用空间够大，则不扩容了
+     * Return ASAP if there is enough space left. 
+     */
     if (avail >= addlen) return s;
 
     len = sdslen(s);
@@ -242,7 +261,8 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {
     return s;
 }
 
-/* Reallocate the sds string so that it has no free space at the end. The
+/* 用于节省空间，和扩容相反
+ * Reallocate the sds string so that it has no free space at the end. The
  * contained string remains not altered, but next concatenation operations
  * will require a reallocation.
  *
