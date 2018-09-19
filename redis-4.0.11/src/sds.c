@@ -301,7 +301,8 @@ sds sdsRemoveFreeSpace(sds s) {
     return s;
 }
 
-/* Return the total size of the allocation of the specifed sds string,
+/* 返回sds对应的总大小
+ * Return the total size of the allocation of the specifed sds string,
  * including:
  * 1) The sds header before the pointer.
  * 2) The string.
@@ -319,7 +320,8 @@ void *sdsAllocPtr(sds s) {
     return (void*) (s-sdsHdrSize(s[-1]));
 }
 
-/* Increment the sds length and decrements the left free space at the
+/* 增加sds长度，并减少剩余空间大小
+ * Increment the sds length and decrements the left free space at the
  * end of the string according to 'incr'. Also set the null term
  * in the new end of the string.
  *
@@ -383,7 +385,8 @@ void sdsIncrLen(sds s, ssize_t incr) {
     s[len] = '\0';
 }
 
-/* Grow the sds to have the specified length. Bytes that were not part of
+/* 将sds增长至某值，增长部分填充0
+ * Grow the sds to have the specified length. Bytes that were not part of
  * the original length of the sds will be set to zero.
  *
  * if the specified length is smaller than the current length, no operation
