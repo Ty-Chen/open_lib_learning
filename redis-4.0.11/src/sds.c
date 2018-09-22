@@ -420,7 +420,8 @@ sds sdscatlen(sds s, const void *t, size_t len) {
     return s;
 }
 
-/* Append the specified null termianted C string to the sds string 's'.
+/* 在sds之后增加一个字符串t
+ * Append the specified null termianted C string to the sds string 's'.
  *
  * After the call, the passed sds string is no longer valid and all the
  * references must be substituted with the new pointer returned by the call. */
@@ -428,7 +429,8 @@ sds sdscat(sds s, const char *t) {
     return sdscatlen(s, t, strlen(t));
 }
 
-/* Append the specified sds 't' to the existing sds 's'.
+/* 在已有的sds之后添加另一个sds
+ * Append the specified sds 't' to the existing sds 's'.
  *
  * After the call, the modified sds string is no longer valid and all the
  * references must be substituted with the new pointer returned by the call. */
@@ -436,7 +438,8 @@ sds sdscatsds(sds s, const sds t) {
     return sdscatlen(s, t, sdslen(t));
 }
 
-/* Destructively modify the sds string 's' to hold the specified binary
+/* 将已有的s内容用t代替
+ * Destructively modify the sds string 's' to hold the specified binary
  * safe string pointed by 't' of length 'len' bytes. */
 sds sdscpylen(sds s, const char *t, size_t len) {
     if (sdsalloc(s) < len) {
@@ -449,13 +452,15 @@ sds sdscpylen(sds s, const char *t, size_t len) {
     return s;
 }
 
-/* Like sdscpylen() but 't' must be a null-termined string so that the length
+/* 使用自动获取长度的方式，将s内容用以NULL结尾的字符串t代替
+ * Like sdscpylen() but 't' must be a null-termined string so that the length
  * of the string is obtained with strlen(). */
 sds sdscpy(sds s, const char *t) {
     return sdscpylen(s, t, strlen(t));
 }
 
-/* Helper for sdscatlonglong() doing the actual number -> string
+/* 将一个long long整数转换为字符串s
+ * Helper for sdscatlonglong() doing the actual number -> string
  * conversion. 's' must point to a string with room for at least
  * SDS_LLSTR_SIZE bytes.
  *
@@ -493,7 +498,9 @@ int sdsll2str(char *s, long long value) {
     return l;
 }
 
-/* Identical sdsll2str(), but for unsigned long long type. */
+/* 和上面类似，只是类型为unsigned
+ * Identical sdsll2str(), but for unsigned long long type. 
+ */
 int sdsull2str(char *s, unsigned long long v) {
     char *p, aux;
     size_t l;
@@ -522,7 +529,8 @@ int sdsull2str(char *s, unsigned long long v) {
     return l;
 }
 
-/* Create an sds string from a long long value. It is much faster than:
+/* 从long long类型创建一个sds
+ * Create an sds string from a long long value. It is much faster than:
  *
  * sdscatprintf(sdsempty(),"%lld\n", value);
  */
@@ -571,7 +579,8 @@ sds sdscatvprintf(sds s, const char *fmt, va_list ap) {
     return t;
 }
 
-/* Append to the sds string 's' a string obtained using printf-alike format
+/* 用va_list实现类Printf格式的sds创建
+ * Append to the sds string 's' a string obtained using printf-alike format
  * specifier.
  *
  * After the call, the modified sds string is no longer valid and all the
@@ -596,7 +605,8 @@ sds sdscatprintf(sds s, const char *fmt, ...) {
     return t;
 }
 
-/* This function is similar to sdscatprintf, but much faster as it does
+/* 不依赖于sprintf()所以速度更快
+ * This function is similar to sdscatprintf, but much faster as it does
  * not rely on sprintf() family functions implemented by the libc that
  * are often very slow. Moreover directly handling the sds string as
  * new data is concatenated provides a performance improvement.
