@@ -742,7 +742,8 @@ sds sdstrim(sds s, const char *cset) {
     return s;
 }
 
-/* Turn the string into a smaller (or equal) string containing only the
+/* 根据start和end截取sds
+ * Turn the string into a smaller (or equal) string containing only the
  * substring specified by the 'start' and 'end' indexes.
  *
  * start and end can be negative, where -1 means the last character of the
@@ -786,21 +787,26 @@ void sdsrange(sds s, ssize_t start, ssize_t end) {
     sdssetlen(s,newlen);
 }
 
-/* Apply tolower() to every character of the sds string 's'. */
+/* 将所有大写转化为小写
+ * Apply tolower() to every character of the sds string 's'. 
+ */
 void sdstolower(sds s) {
     size_t len = sdslen(s), j;
 
     for (j = 0; j < len; j++) s[j] = tolower(s[j]);
 }
 
-/* Apply toupper() to every character of the sds string 's'. */
+/* 将所有小写转化为大写
+ * Apply toupper() to every character of the sds string 's'. 
+ */
 void sdstoupper(sds s) {
     size_t len = sdslen(s), j;
 
     for (j = 0; j < len; j++) s[j] = toupper(s[j]);
 }
 
-/* Compare two sds strings s1 and s2 with memcmp().
+/* 使用memcmp比较两个sds
+ * Compare two sds strings s1 and s2 with memcmp().
  *
  * Return value:
  *
@@ -823,7 +829,8 @@ int sdscmp(const sds s1, const sds s2) {
     return cmp;
 }
 
-/* Split 's' with separator in 'sep'. An array
+/* 通过分隔符sep将s分隔成多段，count为段数
+ * Split 's' with separator in 'sep'. An array
  * of sds strings is returned. *count will be set
  * by reference to the number of tokens returned.
  *
@@ -889,7 +896,9 @@ cleanup:
     }
 }
 
-/* Free the result returned by sdssplitlen(), or do nothing if 'tokens' is NULL. */
+/* 释放切割后的sds资源
+ * Free the result returned by sdssplitlen(), or do nothing if 'tokens' is NULL. 
+ */
 void sdsfreesplitres(sds *tokens, int count) {
     if (!tokens) return;
     while(count--)
