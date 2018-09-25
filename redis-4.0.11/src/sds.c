@@ -906,7 +906,8 @@ void sdsfreesplitres(sds *tokens, int count) {
     s_free(tokens);
 }
 
-/* Append to the sds string "s" an escaped string representation where
+/* 在sds上附加其拥有的特殊符号
+ * Append to the sds string "s" an escaped string representation where
  * all the non-printable characters (tested with isprint()) are turned into
  * escapes in the form "\n\r\a...." or "\x<hex-number>".
  *
@@ -937,15 +938,19 @@ sds sdscatrepr(sds s, const char *p, size_t len) {
     return sdscatlen(s,"\"",1);
 }
 
-/* Helper function for sdssplitargs() that returns non zero if 'c'
- * is a valid hex digit. */
+/* 判断是否是十六进制
+ * Helper function for sdssplitargs() that returns non zero if 'c'
+ * is a valid hex digit. 
+ */
 int is_hex_digit(char c) {
     return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
            (c >= 'A' && c <= 'F');
 }
 
-/* Helper function for sdssplitargs() that converts a hex digit into an
- * integer from 0 to 15 */
+/* 十六进制转换为十进制整形
+ * Helper function for sdssplitargs() that converts a hex digit into an
+ * integer from 0 to 15 
+ */
 int hex_digit_to_int(char c) {
     switch(c) {
     case '0': return 0;
@@ -1097,7 +1102,8 @@ err:
     return NULL;
 }
 
-/* Modify the string substituting all the occurrences of the set of
+/* 将sds中指定的from字符修改为to中指定的字符
+ * Modify the string substituting all the occurrences of the set of
  * characters specified in the 'from' string to the corresponding character
  * in the 'to' array.
  *
@@ -1120,8 +1126,10 @@ sds sdsmapchars(sds s, const char *from, const char *to, size_t setlen) {
     return s;
 }
 
-/* Join an array of C strings using the specified separator (also a C string).
- * Returns the result as an sds string. */
+/* 将argv中的字符串存储在sds中
+ * Join an array of C strings using the specified separator (also a C string).
+ * Returns the result as an sds string. 
+ */
 sds sdsjoin(char **argv, int argc, char *sep) {
     sds join = sdsempty();
     int j;
@@ -1133,7 +1141,9 @@ sds sdsjoin(char **argv, int argc, char *sep) {
     return join;
 }
 
-/* Like sdsjoin, but joins an array of SDS strings. */
+/* 拼接存储一些列sds
+ * Like sdsjoin, but joins an array of SDS strings. 
+ */
 sds sdsjoinsds(sds *argv, int argc, const char *sep, size_t seplen) {
     sds join = sdsempty();
     int j;
@@ -1163,11 +1173,10 @@ void sds_free(void *ptr) { s_free(ptr); }
 int sdsTest(void) {
     {
         sds x = sdsnew("foo"), y;
-
         test_cond("Create a string and obtain the length",
             sdslen(x) == 3 && memcmp(x,"foo\0",4) == 0)
-
         sdsfree(x);
+		
         x = sdsnewlen("foo",2);
         test_cond("Create a string with specified length",
             sdslen(x) == 2 && memcmp(x,"fo\0",3) == 0)
@@ -1184,13 +1193,13 @@ int sdsTest(void) {
         test_cond("sdscpy() against an originally shorter string",
             sdslen(x) == 33 &&
             memcmp(x,"xyzxxxxxxxxxxyyyyyyyyyykkkkkkkkkk\0",33) == 0)
-
         sdsfree(x);
+		
         x = sdscatprintf(sdsempty(),"%d",123);
         test_cond("sdscatprintf() seems working in the base case",
             sdslen(x) == 3 && memcmp(x,"123\0",4) == 0)
-
         sdsfree(x);
+		
         x = sdsnew("--");
         x = sdscatfmt(x, "Hello %s World %I,%I--", "Hi!", LLONG_MIN,LLONG_MAX);
         test_cond("sdscatfmt() seems working in the base case",
