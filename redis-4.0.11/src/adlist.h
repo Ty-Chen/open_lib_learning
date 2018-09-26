@@ -32,18 +32,24 @@
 #define __ADLIST_H__
 
 /* Node, List, and Iterator are the only data structures used currently. */
-
+/* 经典的双向链表节点定义：
+ * 两个指针指向前后节点，一个指针指向值
+ */
 typedef struct listNode {
     struct listNode *prev;
     struct listNode *next;
     void *value;
 } listNode;
 
+/*类似于c++11的迭代器，仅指向next，direction注明方向*/
 typedef struct listIter {
     listNode *next;
     int direction;
 } listIter;
 
+/* 链表结构体，包括头尾节点、长度和几个函数
+ * 复制、释放、查找函数
+ */
 typedef struct list {
     listNode *head;
     listNode *tail;
