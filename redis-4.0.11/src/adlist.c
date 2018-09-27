@@ -33,7 +33,7 @@
 #include "adlist.h"
 #include "zmalloc.h"
 
-/* 创建新链表
+/* 创建新链表，赋值为NULL
  * Create a new list. The created list can be freed with
  * AlFreeList(), but private value of every node need to be freed
  * by the user before to call AlFreeList().
@@ -53,7 +53,9 @@ list *listCreate(void)
     return list;
 }
 
-/* Remove all the elements from the list without destroying the list itself. */
+/* 将链表清空，并赋值为NULL
+ * Remove all the elements from the list without destroying the list itself. 
+ */
 void listEmpty(list *list)
 {
     unsigned long len;
@@ -71,7 +73,8 @@ void listEmpty(list *list)
     list->len = 0;
 }
 
-/* Free the whole list.
+/* 释放链表
+ * Free the whole list.
  *
  * This function can't fail. */
 void listRelease(list *list)
@@ -80,7 +83,8 @@ void listRelease(list *list)
     zfree(list);
 }
 
-/* Add a new node to the list, to head, containing the specified 'value'
+/* 为链表添加新的一个头结点，值为value
+ * Add a new node to the list, to head, containing the specified 'value'
  * pointer as value.
  *
  * On error, NULL is returned and no operation is performed (i.e. the
@@ -106,7 +110,8 @@ list *listAddNodeHead(list *list, void *value)
     return list;
 }
 
-/* Add a new node to the list, to tail, containing the specified 'value'
+/* 为链表添加新的一个尾结点，值为value
+ * Add a new node to the list, to tail, containing the specified 'value'
  * pointer as value.
  *
  * On error, NULL is returned and no operation is performed (i.e. the
