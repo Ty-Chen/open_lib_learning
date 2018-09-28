@@ -137,6 +137,7 @@ list *listAddNodeTail(list *list, void *value)
     return list;
 }
 
+/*在after之后插入节点*/
 list *listInsertNode(list *list, listNode *old_node, void *value, int after) {
     listNode *node;
 
