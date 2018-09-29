@@ -137,13 +137,18 @@ list *listAddNodeTail(list *list, void *value)
     return list;
 }
 
-/*在after之后插入节点*/
-list *listInsertNode(list *list, listNode *old_node, void *value, int after) {
+/*在old_node之后/前插入节点，由after控制*/
+list *listInsertNode(list *list, listNode *old_node, void *value, int after) 
+{
     listNode *node;
 
     if ((node = zmalloc(sizeof(*node))) == NULL)
         return NULL;
     node->value = value;
+
+	/* after大于0则在old_node之后插入
+     * 否则在old_node之前插入
+	 */
     if (after) {
         node->prev = old_node;
         node->next = old_node->next;
@@ -157,6 +162,7 @@ list *listInsertNode(list *list, listNode *old_node, void *value, int after) {
             list->head = node;
         }
     }
+	
     if (node->prev != NULL) {
         node->prev->next = node;
     }
@@ -167,20 +173,26 @@ list *listInsertNode(list *list, listNode *old_node, void *value, int after) {
     return list;
 }
 
-/* Remove the specified node from the specified list.
+/* 从链表中删除节点
+ * Remove the specified node from the specified list.
  * It's up to the caller to free the private value of the node.
  *
  * This function can't fail. */
 void listDelNode(list *list, listNode *node)
 {
+	/*如果前面有节点，则让前面节点指向后面节点*/
     if (node->prev)
         node->prev->next = node->next;
     else
         list->head = node->next;
+	
+	/*如果有后面节点，则后面节点的prev指向前面节点*/
     if (node->next)
         node->next->prev = node->prev;
     else
         list->tail = node->prev;
+
+	/*释放节点并减少len*/
     if (list->free) list->free(node->value);
     zfree(node);
     list->len--;
