@@ -198,7 +198,8 @@ void listDelNode(list *list, listNode *node)
     list->len--;
 }
 
-/* Returns a list iterator 'iter'. After the initialization every
+/* 类似于STL的迭代器，根据direction确定指向头或者尾
+ * Returns a list iterator 'iter'. After the initialization every
  * call to listNext() will return the next element of the list.
  *
  * This function can't fail. */
@@ -215,23 +216,29 @@ listIter *listGetIterator(list *list, int direction)
     return iter;
 }
 
-/* Release the iterator memory */
+/* 释放资源
+ * Release the iterator memory 
+ */
 void listReleaseIterator(listIter *iter) {
     zfree(iter);
 }
 
-/* Create an iterator in the list private iterator structure */
+/* 使用li作为list的头部迭代器
+ * Create an iterator in the list private iterator structure 
+ */
 void listRewind(list *list, listIter *li) {
     li->next = list->head;
     li->direction = AL_START_HEAD;
 }
 
+/*使用li作为list的尾部迭代器*/
 void listRewindTail(list *list, listIter *li) {
     li->next = list->tail;
     li->direction = AL_START_TAIL;
 }
 
-/* Return the next element of an iterator.
+/* 返回迭代器的下一个元素
+ * Return the next element of an iterator.
  * It's valid to remove the currently returned element using
  * listDelNode(), but not to remove other elements.
  *
@@ -258,7 +265,8 @@ listNode *listNext(listIter *iter)
     return current;
 }
 
-/* Duplicate the whole list. On out of memory NULL is returned.
+/* 复制链表
+ * Duplicate the whole list. On out of memory NULL is returned.
  * On success a copy of the original list is returned.
  *
  * The 'Dup' method set with listSetDupMethod() function is used
