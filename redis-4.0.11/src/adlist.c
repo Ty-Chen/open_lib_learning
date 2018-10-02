@@ -305,7 +305,8 @@ list *listDup(list *orig)
     return copy;
 }
 
-/* Search the list for a node matching a given key.
+/* 寻找关键字key所在链表
+ * Search the list for a node matching a given key.
  * The match is performed using the 'match' method
  * set with listSetMatchMethod(). If no 'match' method
  * is set, the 'value' pointer of every node is directly
@@ -353,7 +354,8 @@ listNode *listIndex(list *list, long index) {
     return n;
 }
 
-/* Rotate the list removing the tail node and inserting it to the head. */
+/* 双向链表的旋转十分简单：删除尾节点，插入头部即可
+ * Rotate the list removing the tail node and inserting it to the head. */
 void listRotate(list *list) {
     listNode *tail = list->tail;
 
@@ -369,8 +371,10 @@ void listRotate(list *list) {
     list->head = tail;
 }
 
-/* Add all the elements of the list 'o' at the end of the
- * list 'l'. The list 'other' remains empty but otherwise valid. */
+/* 在链表l的尾部插入链表o
+ * Add all the elements of the list 'o' at the end of the
+ * list 'l'. The list 'other' remains empty but otherwise valid. 
+ */
 void listJoin(list *l, list *o) {
     if (o->head)
         o->head->prev = l->tail;
