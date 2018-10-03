@@ -44,6 +44,7 @@
 /* Unused arguments generate annoying warnings... */
 #define DICT_NOTUSED(V) ((void) V)
 
+/*字典（哈希表），由key，value，和指针next组成*/
 typedef struct dictEntry {
     void *key;
     union {
@@ -55,6 +56,7 @@ typedef struct dictEntry {
     struct dictEntry *next;
 } dictEntry;
 
+/*函数指针，字典类型*/
 typedef struct dictType {
     uint64_t (*hashFunction)(const void *key);
     void *(*keyDup)(void *privdata, const void *key);
@@ -64,7 +66,8 @@ typedef struct dictType {
     void (*valDestructor)(void *privdata, void *obj);
 } dictType;
 
-/* This is our hash table structure. Every dictionary has two of this as we
+/* 字典哈希表
+ * This is our hash table structure. Every dictionary has two of this as we
  * implement incremental rehashing, for the old to the new table. */
 typedef struct dictht {
     dictEntry **table;
@@ -73,6 +76,7 @@ typedef struct dictht {
     unsigned long used;
 } dictht;
 
+/*封装的字典结构*/
 typedef struct dict {
     dictType *type;
     void *privdata;
@@ -81,7 +85,8 @@ typedef struct dict {
     unsigned long iterators; /* number of iterators currently running */
 } dict;
 
-/* If safe is set to 1 this is a safe iterator, that means, you can call
+/* 字典迭代器
+ * If safe is set to 1 this is a safe iterator, that means, you can call
  * dictAdd, dictFind, and other functions against the dictionary even while
  * iterating. Otherwise it is a non safe iterator, and only dictNext()
  * should be called while iterating. */
