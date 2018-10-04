@@ -105,7 +105,7 @@ typedef void (dictScanBucketFunction)(void *privdata, dictEntry **bucketref);
 /* This is the initial size of every hash table */
 #define DICT_HT_INITIAL_SIZE     4
 
-/* ------------------------------- Macros ------------------------------------*/
+/* 宏------------------------------- Macros ------------------------------------*/
 #define dictFreeVal(d, entry) \
     if ((d)->type->valDestructor) \
         (d)->type->valDestructor((d)->privdata, (entry)->v.val)
