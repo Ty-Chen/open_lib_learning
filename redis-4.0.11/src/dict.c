@@ -108,7 +108,9 @@ static void _dictReset(dictht *ht)
     ht->used = 0;
 }
 
-/* Create a new hash table */
+/* 新建哈希表
+ * Create a new hash table
+ */
 dict *dictCreate(dictType *type,
         void *privDataPtr)
 {
@@ -118,7 +120,9 @@ dict *dictCreate(dictType *type,
     return d;
 }
 
-/* Initialize the hash table */
+/* 初始化字典d，包括两个哈希表
+ * Initialize the hash table 
+ */
 int _dictInit(dict *d, dictType *type,
         void *privDataPtr)
 {
@@ -131,7 +135,8 @@ int _dictInit(dict *d, dictType *type,
     return DICT_OK;
 }
 
-/* Resize the table to the minimal size that contains all the elements,
+/* 字典重新设置大小
+ * Resize the table to the minimal size that contains all the elements,
  * but with the invariant of a USED/BUCKETS ratio near to <= 1 */
 int dictResize(dict *d)
 {
