@@ -106,10 +106,13 @@ typedef void (dictScanBucketFunction)(void *privdata, dictEntry **bucketref);
 #define DICT_HT_INITIAL_SIZE     4
 
 /* 宏------------------------------- Macros ------------------------------------*/
+
+/*调用析构函数*/
 #define dictFreeVal(d, entry) \
     if ((d)->type->valDestructor) \
         (d)->type->valDestructor((d)->privdata, (entry)->v.val)
 
+/*调用valDup函数完成赋值*/
 #define dictSetVal(d, entry, _val_) do { \
     if ((d)->type->valDup) \
         (entry)->v.val = (d)->type->valDup((d)->privdata, _val_); \
