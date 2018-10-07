@@ -149,21 +149,30 @@ int dictResize(dict *d)
     return dictExpand(d, minimal);
 }
 
-/* Expand or create the hash table */
+/* 扩展哈希表或者创建哈希表
+ * Expand or create the hash table 
+ */
 int dictExpand(dict *d, unsigned long size)
 {
     dictht n; /* the new hash table */
+	
+	/*返回realsize值为大于size的2的次方*/
     unsigned long realsize = _dictNextPower(size);
 
-    /* the size is invalid if it is smaller than the number of
+    /* 分配size要大于已用空间才有效
+     * the size is invalid if it is smaller than the number of
      * elements already inside the hash table */
     if (dictIsRehashing(d) || d->ht[0].used > size)
         return DICT_ERR;
 
-    /* Rehashing to the same table size is not useful. */
+    /* 如果size和已有size相等则无效
+     * Rehashing to the same table size is not useful. 
+     */
     if (realsize == d->ht[0].size) return DICT_ERR;
 
-    /* Allocate the new hash table and initialize all pointers to NULL */
+    /* 新建并初始化字典n
+     * Allocate the new hash table and initialize all pointers to NULL 
+     */
     n.size = realsize;
     n.sizemask = realsize-1;
     n.table = zcalloc(realsize*sizeof(dictEntry*));
