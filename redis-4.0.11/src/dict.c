@@ -191,7 +191,8 @@ int dictExpand(dict *d, unsigned long size)
     return DICT_OK;
 }
 
-/* Performs N steps of incremental rehashing. Returns 1 if there are still
+/*  
+ * Performs N steps of incremental rehashing. Returns 1 if there are still
  * keys to move from the old to the new hash table, otherwise 0 is returned.
  *
  * Note that a rehashing step consists in moving a bucket (that may have more
