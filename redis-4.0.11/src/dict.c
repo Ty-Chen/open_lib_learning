@@ -108,7 +108,7 @@ static void _dictReset(dictht *ht)
     ht->used = 0;
 }
 
-/* 新建哈希表
+/* 新建字典，调用初始化函数
  * Create a new hash table
  */
 dict *dictCreate(dictType *type,
@@ -120,7 +120,7 @@ dict *dictCreate(dictType *type,
     return d;
 }
 
-/* 初始化字典d，包括两个哈希表
+/* 初始化字典d，包括两个哈希表的初始化
  * Initialize the hash table 
  */
 int _dictInit(dict *d, dictType *type,
@@ -149,7 +149,7 @@ int dictResize(dict *d)
     return dictExpand(d, minimal);
 }
 
-/* 扩展哈希表或者创建哈希表
+/* 字典的扩展或者创建（第一次扩展即创建）
  * Expand or create the hash table 
  */
 int dictExpand(dict *d, unsigned long size)
@@ -191,7 +191,8 @@ int dictExpand(dict *d, unsigned long size)
     return DICT_OK;
 }
 
-/* Performs N steps of incremental rehashing. Returns 1 if there are still
+/* N步增量重哈希
+ * Performs N steps of incremental rehashing. Returns 1 if there are still
  * keys to move from the old to the new hash table, otherwise 0 is returned.
  *
  * Note that a rehashing step consists in moving a bucket (that may have more
@@ -201,7 +202,7 @@ int dictExpand(dict *d, unsigned long size)
  * will visit at max N*10 empty buckets in total, otherwise the amount of
  * work it does would be unbound and the function may block for a long time. */
 int dictRehash(dict *d, int n) {
-    int empty_visits = n*10; /* Max number of empty buckets to visit. */
+    int empty_visits = n * 10; /* Max number of empty buckets to visit. */
     if (!dictIsRehashing(d)) return 0;
 
     while(n-- && d->ht[0].used != 0) {

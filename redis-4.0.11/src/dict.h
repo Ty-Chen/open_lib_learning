@@ -44,7 +44,7 @@
 /* Unused arguments generate annoying warnings... */
 #define DICT_NOTUSED(V) ((void) V)
 
-/*字典（哈希表），由key，value，和指针next组成*/
+/*字典（哈希表）的键值对，由key，v，和指针next组成，是拉链式哈希表的实际存储位置*/
 typedef struct dictEntry {
     void *key;
     union {
@@ -56,7 +56,7 @@ typedef struct dictEntry {
     struct dictEntry *next;
 } dictEntry;
 
-/*函数指针，字典类型*/
+/*函数指针结构体*/
 typedef struct dictType {
     uint64_t (*hashFunction)(const void *key);
     void *(*keyDup)(void *privdata, const void *key);
@@ -66,7 +66,7 @@ typedef struct dictType {
     void (*valDestructor)(void *privdata, void *obj);
 } dictType;
 
-/* 字典哈希表
+/* 哈希表，用于管理众多表项table[]，每一项均是一个链表
  * This is our hash table structure. Every dictionary has two of this as we
  * implement incremental rehashing, for the old to the new table. */
 typedef struct dictht {
@@ -76,7 +76,7 @@ typedef struct dictht {
     unsigned long used;
 } dictht;
 
-/*封装的字典结构*/
+/*封装的字典结构，包括dictType和两个哈希表*/
 typedef struct dict {
     dictType *type;
     void *privdata;
@@ -107,7 +107,7 @@ typedef void (dictScanBucketFunction)(void *privdata, dictEntry **bucketref);
 
 /* 宏------------------------------- Macros ------------------------------------*/
 
-/*调用析构函数*/
+/*调用析构函数释放VAL*/
 #define dictFreeVal(d, entry) \
     if ((d)->type->valDestructor) \
         (d)->type->valDestructor((d)->privdata, (entry)->v.val)

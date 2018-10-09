@@ -42,12 +42,14 @@
 /* Unused arguments generate annoying warnings... */
 #define DICT_NOTUSED(V) ((void) V)
 
+/*键值对，拉链式哈希存储的实际位置*/
 typedef struct dictEntry {
     void *key;
     void *val;
     struct dictEntry *next;
 } dictEntry;
 
+/*存储函数指针的类，指向dict*/
 typedef struct dictType {
     unsigned int (*hashFunction)(const void *key);
     void *(*keyDup)(void *privdata, const void *key);
@@ -57,6 +59,7 @@ typedef struct dictType {
     void (*valDestructor)(void *privdata, void *obj);
 } dictType;
 
+/*字典结构体，其中包括了dictType，即各个函数，以及两个哈希表*/
 typedef struct dict {
     dictEntry **table;
     dictType *type;
