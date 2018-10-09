@@ -193,9 +193,6 @@ int dictExpand(dict *d, unsigned long size)
 
 <<<<<<< HEAD
 /* N步增量重哈希
-=======
-/*  
->>>>>>> 1eaedd810588694709ce4ca81c9c17ac06c7dbe7
  * Performs N steps of incremental rehashing. Returns 1 if there are still
  * keys to move from the old to the new hash table, otherwise 0 is returned.
  *
