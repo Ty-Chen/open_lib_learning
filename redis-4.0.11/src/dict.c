@@ -99,7 +99,8 @@ uint64_t dictGenCaseHashFunction(const unsigned char *buf, int len) {
 
 /* 哈希表清零
  * Reset a hash table already initialized with ht_init().
- * NOTE: This function should only be called by ht_destroy(). */
+ * NOTE: This function should only be called by ht_destroy(). 
+ */
 static void _dictReset(dictht *ht)
 {
     ht->table = NULL;
@@ -137,7 +138,8 @@ int _dictInit(dict *d, dictType *type,
 
 /* 字典重新设置大小
  * Resize the table to the minimal size that contains all the elements,
- * but with the invariant of a USED/BUCKETS ratio near to <= 1 */
+ * but with the invariant of a USED/BUCKETS ratio near to <= 1 
+ */
 int dictResize(dict *d)
 {
     int minimal;
@@ -191,7 +193,6 @@ int dictExpand(dict *d, unsigned long size)
     return DICT_OK;
 }
 
-<<<<<<< HEAD
 /* N步增量重哈希
  * Performs N steps of incremental rehashing. Returns 1 if there are still
  * keys to move from the old to the new hash table, otherwise 0 is returned.
@@ -201,21 +202,29 @@ int dictExpand(dict *d, unsigned long size)
  * since part of the hash table may be composed of empty spaces, it is not
  * guaranteed that this function will rehash even a single bucket, since it
  * will visit at max N*10 empty buckets in total, otherwise the amount of
- * work it does would be unbound and the function may block for a long time. */
-int dictRehash(dict *d, int n) {
-    int empty_visits = n * 10; /* Max number of empty buckets to visit. */
+ * work it does would be unbound and the function may block for a long time. 
+ */
+int dictRehash(dict *d, int n) 
+{
+    int empty_visits = n * 10; /* 为防止不必要的阻塞而设置Max number of empty buckets to visit. */
     if (!dictIsRehashing(d)) return 0;
 
     while(n-- && d->ht[0].used != 0) {
+		
         dictEntry *de, *nextde;
 
-        /* Note that rehashidx can't overflow as we are sure there are more
-         * elements because ht[0].used != 0 */
+        /* 防止溢出
+         * Note that rehashidx can't overflow as we are sure there are more
+         * elements because ht[0].used != 0 
+         */
         assert(d->ht[0].size > (unsigned long)d->rehashidx);
+
+		/*遇到空的就跳过*/
         while(d->ht[0].table[d->rehashidx] == NULL) {
             d->rehashidx++;
             if (--empty_visits == 0) return 1;
         }
+		
         de = d->ht[0].table[d->rehashidx];
         /* Move all the keys in this bucket from the old to the new hash HT */
         while(de) {
@@ -247,11 +256,12 @@ int dictRehash(dict *d, int n) {
     return 1;
 }
 
+/*获取时间并转换为毫秒级*/
 long long timeInMilliseconds(void) {
     struct timeval tv;
 
-    gettimeofday(&tv,NULL);
-    return (((long long)tv.tv_sec)*1000)+(tv.tv_usec/1000);
+    gettimeofday(&tv, NULL);
+    return (((long long)tv.tv_sec) * 1000) + (tv.tv_usec / 1000);
 }
 
 /* Rehash for an amount of time between ms milliseconds and ms+1 milliseconds */
@@ -259,7 +269,7 @@ int dictRehashMilliseconds(dict *d, int ms) {
     long long start = timeInMilliseconds();
     int rehashes = 0;
 
-    while(dictRehash(d,100)) {
+    while(dictRehash(d, 100)) {
         rehashes += 100;
         if (timeInMilliseconds()-start > ms) break;
     }
