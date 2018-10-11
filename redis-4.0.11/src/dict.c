@@ -257,15 +257,19 @@ int dictRehash(dict *d, int n)
 }
 
 /*获取时间并转换为毫秒级*/
-long long timeInMilliseconds(void) {
+long long timeInMilliseconds(void) 
+{
     struct timeval tv;
 
     gettimeofday(&tv, NULL);
     return (((long long)tv.tv_sec) * 1000) + (tv.tv_usec / 1000);
 }
 
-/* Rehash for an amount of time between ms milliseconds and ms+1 milliseconds */
-int dictRehashMilliseconds(dict *d, int ms) {
+/* 在ms毫秒内进行重哈希
+ * Rehash for an amount of time between ms milliseconds and ms+1 milliseconds 
+ */
+int dictRehashMilliseconds(dict *d, int ms) 
+{
     long long start = timeInMilliseconds();
     int rehashes = 0;
 
@@ -276,22 +280,26 @@ int dictRehashMilliseconds(dict *d, int ms) {
     return rehashes;
 }
 
-/* This function performs just a step of rehashing, and only if there are
+/* 一步重哈希，仅在迭代器为0时生效
+ * This function performs just a step of rehashing, and only if there are
  * no safe iterators bound to our hash table. When we have iterators in the
  * middle of a rehashing we can't mess with the two hash tables otherwise
  * some element can be missed or duplicated.
  *
  * This function is called by common lookup or update operations in the
  * dictionary so that the hash table automatically migrates from H1 to H2
- * while it is actively used. */
+ * while it is actively used. 
+ */
 static void _dictRehashStep(dict *d) {
-    if (d->iterators == 0) dictRehash(d,1);
+    if (d->iterators == 0) dictRehash(d, 1);
 }
 
-/* Add an element to the target hash table */
+/* 在哈希表中增加新的项
+ * Add an element to the target hash table 
+ */
 int dictAdd(dict *d, void *key, void *val)
 {
-    dictEntry *entry = dictAddRaw(d,key,NULL);
+    dictEntry *entry = dictAddRaw(d, key, NULL);
 
     if (!entry) return DICT_ERR;
     dictSetVal(d, entry, val);
