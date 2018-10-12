@@ -294,7 +294,7 @@ static void _dictRehashStep(dict *d) {
     if (d->iterators == 0) dictRehash(d, 1);
 }
 
-/* 在哈希表中增加新的项
+/* 在哈希表中增加新的项，调用dictAddRaw()函数
  * Add an element to the target hash table 
  */
 int dictAdd(dict *d, void *key, void *val)
@@ -306,7 +306,8 @@ int dictAdd(dict *d, void *key, void *val)
     return DICT_OK;
 }
 
-/* Low level add or find:
+/* 底层添加、查找函数
+ * Low level add or find:
  * This function adds the entry but instead of setting a value returns the
  * dictEntry structure to the user, that will make sure to fill the value
  * field as he wishes.
