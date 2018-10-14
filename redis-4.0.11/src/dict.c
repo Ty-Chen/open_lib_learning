@@ -306,7 +306,7 @@ int dictAdd(dict *d, void *key, void *val)
     return DICT_OK;
 }
 
-/* 底层添加、查找函数
+/* 底层添加、查找函数：第三项为NULL则添加，不为NULL则查找
  * Low level add or find:
  * This function adds the entry but instead of setting a value returns the
  * dictEntry structure to the user, that will make sure to fill the value
@@ -333,12 +333,14 @@ dictEntry *dictAddRaw(dict *d, void *key, dictEntry **existing)
 
     if (dictIsRehashing(d)) _dictRehashStep(d);
 
-    /* Get the index of the new element, or -1 if
+    /* 获取key对应的索引
+     * Get the index of the new element, or -1 if
      * the element already exists. */
     if ((index = _dictKeyIndex(d, key, dictHashKey(d,key), existing)) == -1)
         return NULL;
 
-    /* Allocate the memory and store the new entry.
+    /* 分配空间并存储新的dictentry，在顶端插入
+     * Allocate the memory and store the new entry.
      * Insert the element in top, with the assumption that in a database
      * system it is more likely that recently added entries are accessed
      * more frequently. */
@@ -353,7 +355,8 @@ dictEntry *dictAddRaw(dict *d, void *key, dictEntry **existing)
     return entry;
 }
 
-/* Add or Overwrite:
+/* 添加或复写
+ * Add or Overwrite:
  * Add an element, discarding the old value if the key already exists.
  * Return 1 if the key was added from scratch, 0 if there was already an
  * element with such key and dictReplace() just performed a value update
