@@ -387,7 +387,8 @@ int dictReplace(dict *d, void *key, void *val)
     return 0;
 }
 
-/* Add or Find:
+/* 添加或查找：成功添加则返回entry，失败则返回existing
+ * Add or Find:
  * dictAddOrFind() is simply a version of dictAddRaw() that always
  * returns the hash entry of the specified key, even if the key already
  * exists and can't be added (in that case the entry of the already
@@ -396,11 +397,12 @@ int dictReplace(dict *d, void *key, void *val)
  * See dictAddRaw() for more information. */
 dictEntry *dictAddOrFind(dict *d, void *key) {
     dictEntry *entry, *existing;
-    entry = dictAddRaw(d,key,&existing);
+    entry = dictAddRaw(d, key, &existing);
     return entry ? entry : existing;
 }
 
-/* Search and remove an element. This is an helper function for
+/* 查找并删除
+ * Search and remove an element. This is an helper function for
  * dictDelete() and dictUnlink(), please check the top comment
  * of those functions. */
 static dictEntry *dictGenericDelete(dict *d, const void *key, int nofree) {
