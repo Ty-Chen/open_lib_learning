@@ -447,13 +447,17 @@ static dictEntry *dictGenericDelete(dict *d, const void *key, int nofree)
     return NULL; /* not found */
 }
 
-/* Remove an element, returning DICT_OK on success or DICT_ERR if the
- * element was not found. */
+/* 调用dictGenericDelete()函数完成删除key的功能
+ * Remove an element, returning DICT_OK on success or DICT_ERR if the
+ * element was not found. 
+ */
 int dictDelete(dict *ht, const void *key) {
     return dictGenericDelete(ht, key, 0) ? DICT_OK : DICT_ERR;
 }
 
-/* Remove an element from the table, but without actually releasing
+/* 调用dictGenericDelete()函数完成删除key的功能
+ * 从表中删除key，但是没有释放（第三项赋值1而不是0）
+ * Remove an element from the table, but without actually releasing
  * the key, value and dictionary entry. The dictionary entry is returned
  * if the element was found (and unlinked from the table), and the user
  * should later call `dictFreeUnlinkedEntry()` with it in order to release it.
@@ -478,8 +482,10 @@ dictEntry *dictUnlink(dict *ht, const void *key) {
     return dictGenericDelete(ht, key, 1);
 }
 
-/* You need to call this function to really free the entry after a call
- * to dictUnlink(). It's safe to call this function with 'he' = NULL. */
+/* 为dicUnlink()服务，释放key
+ * You need to call this function to really free the entry after a call
+ * to dictUnlink(). It's safe to call this function with 'he' = NULL. 
+ */
 void dictFreeUnlinkedEntry(dict *d, dictEntry *he) {
     if (he == NULL) return;
     dictFreeKey(d, he);
@@ -487,14 +493,18 @@ void dictFreeUnlinkedEntry(dict *d, dictEntry *he) {
     zfree(he);
 }
 
-/* Destroy an entire dictionary */
-int _dictClear(dict *d, dictht *ht, void(callback)(void *)) {
+/* 完全清除字典d的哈希表ht
+ * Destroy an entire dictionary 
+ */
+int _dictClear(dict *d, dictht *ht, void(callback)(void *)) 
+{
     unsigned long i;
 
     /* Free all the elements */
     for (i = 0; i < ht->size && ht->used > 0; i++) {
         dictEntry *he, *nextHe;
 
+		//i等于0并且回调函数传参不为空则回调callback
         if (callback && (i & 65535) == 0) callback(d->privdata);
 
         if ((he = ht->table[i]) == NULL) continue;
@@ -514,11 +524,13 @@ int _dictClear(dict *d, dictht *ht, void(callback)(void *)) {
     return DICT_OK; /* never fails */
 }
 
-/* Clear & Release the hash table */
+/* 清除两张表，完成释放
+ * Clear & Release the hash table 
+ */
 void dictRelease(dict *d)
 {
-    _dictClear(d,&d->ht[0],NULL);
-    _dictClear(d,&d->ht[1],NULL);
+    _dictClear(d, &d->ht[0], NULL);
+    _dictClear(d, &d->ht[1], NULL);
     zfree(d);
 }
 
