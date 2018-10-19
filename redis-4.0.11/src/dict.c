@@ -534,12 +534,13 @@ void dictRelease(dict *d)
     zfree(d);
 }
 
+/*根据key查找*/
 dictEntry *dictFind(dict *d, const void *key)
 {
     dictEntry *he;
     uint64_t h, idx, table;
 
-    if (d->ht[0].used + d->ht[1].used == 0) return NULL; /* dict is empty */
+    if (d->ht[0].used + d->ht[1].used == 0) return NULL; /* 空表 dict is empty */
     if (dictIsRehashing(d)) _dictRehashStep(d);
     h = dictHashKey(d, key);
     for (table = 0; table <= 1; table++) {
