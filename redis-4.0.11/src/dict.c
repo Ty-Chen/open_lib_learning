@@ -563,16 +563,22 @@ void *dictFetchValue(dict *d, const void *key) {
     return he ? dictGetVal(he) : NULL;
 }
 
-/* A fingerprint is a 64 bit number that represents the state of the dictionary
+/* 64位特征指纹码：类似于线程锁，用于保证迭代器安全
+ * A fingerprint is a 64 bit number that represents the state of the dictionary
  * at a given time, it's just a few dict properties xored together.
  * When an unsafe iterator is initialized, we get the dict fingerprint, and check
  * the fingerprint again when the iterator is released.
  * If the two fingerprints are different it means that the user of the iterator
  * performed forbidden operations against the dictionary while iterating. */
-long long dictFingerprint(dict *d) {
+long long dictFingerprint(dict *d) 
+{
     long long integers[6], hash = 0;
     int j;
 
+	/* 将dict结构体中的几个状态放入到数组中，以便后面应用到64 bit MixFunctions中。
+	 * dict结构体其实就是一个hash表的实现，而这些状态其实就是第一、第二哈希表的表地址、表大小与
+	 * 已用条目的数量
+	 */
     integers[0] = (long) d->ht[0].table;
     integers[1] = d->ht[0].size;
     integers[2] = d->ht[0].used;
@@ -580,7 +586,11 @@ long long dictFingerprint(dict *d) {
     integers[4] = d->ht[1].size;
     integers[5] = d->ht[1].used;
 
-    /* We hash N integers by summing every successive integer with the integer
+    /*
+     * 利用64 bit Mix Functions，将这些状态信息混合到hash中，组成最后的指纹，如果这些状态中有一个
+     * 出现变化，可以通过一个算法逆推出该状态变化之前的值。例如，d->ht[0].size发生变化，则我们可
+     * 以通过hash和其他的几个状态，逆推出d->ht[0].size的最初值。
+     * We hash N integers by summing every successive integer with the integer
      * hashing of the previous sum. Basically:
      *
      * Result = hash(hash(hash(int1)+int2)+int3) ...
@@ -601,6 +611,7 @@ long long dictFingerprint(dict *d) {
     return hash;
 }
 
+/*创建并返回dict的迭代器*/
 dictIterator *dictGetIterator(dict *d)
 {
     dictIterator *iter = zmalloc(sizeof(*iter));
@@ -614,7 +625,9 @@ dictIterator *dictGetIterator(dict *d)
     return iter;
 }
 
-dictIterator *dictGetSafeIterator(dict *d) {
+/*调用dictGetIterator()函数创建安全迭代器*/
+dictIterator *dictGetSafeIterator(dict *d) 
+{
     dictIterator *i = dictGetIterator(d);
 
     i->safe = 1;
