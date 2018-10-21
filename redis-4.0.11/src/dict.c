@@ -540,7 +540,8 @@ dictEntry *dictFind(dict *d, const void *key)
     dictEntry *he;
     uint64_t h, idx, table;
 
-    if (d->ht[0].used + d->ht[1].used == 0) return NULL; /* 空表 dict is empty */
+	/* 空表 dict is empty */
+    if (d->ht[0].used + d->ht[1].used == 0) return NULL; 
     if (dictIsRehashing(d)) _dictRehashStep(d);
     h = dictHashKey(d, key);
     for (table = 0; table <= 1; table++) {
@@ -634,6 +635,8 @@ dictIterator *dictGetSafeIterator(dict *d)
     return i;
 }
 
+/* 根据迭代器获取下一个表项
+ */
 dictEntry *dictNext(dictIterator *iter)
 {
     while (1) {
@@ -669,6 +672,7 @@ dictEntry *dictNext(dictIterator *iter)
     return NULL;
 }
 
+/*释放迭代器*/
 void dictReleaseIterator(dictIterator *iter)
 {
     if (!(iter->index == -1 && iter->table == 0)) {
@@ -680,7 +684,8 @@ void dictReleaseIterator(dictIterator *iter)
     zfree(iter);
 }
 
-/* Return a random entry from the hash table. Useful to
+/* 随机返回哈希表中的一项，用于随机算法
+ * Return a random entry from the hash table. Useful to
  * implement randomized algorithms */
 dictEntry *dictGetRandomKey(dict *d)
 {
