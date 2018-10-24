@@ -728,7 +728,8 @@ dictEntry *dictGetRandomKey(dict *d)
     return he;
 }
 
-/* This function samples the dictionary to return a few keys from random
+/* 随机获取多个key
+ * This function samples the dictionary to return a few keys from random
  * locations.
  *
  * It does not guarantee to return all the keys specified in 'count', nor
@@ -751,7 +752,8 @@ dictEntry *dictGetRandomKey(dict *d)
  * statistics. However the function is much faster than dictGetRandomKey()
  * at producing N elements. 
  */
-unsigned int dictGetSomeKeys(dict *d, dictEntry **des, unsigned int count) {
+unsigned int dictGetSomeKeys(dict *d, dictEntry **des, unsigned int count) 
+{
     unsigned long j; /* internal hash table id, 0 or 1. */
     unsigned long tables; /* 1 or 2 tables? */
     unsigned long stored = 0, maxsizemask;
@@ -780,12 +782,14 @@ unsigned int dictGetSomeKeys(dict *d, dictEntry **des, unsigned int count) {
         for (j = 0; j < tables; j++) {
             /* Invariant of the dict.c rehashing: up to the indexes already
              * visited in ht[0] during the rehashing, there are no populated
-             * buckets, so we can skip ht[0] for indexes between 0 and idx-1. */
+             * buckets, so we can skip ht[0] for indexes between 0 and idx-1. 
+             */
             if (tables == 2 && j == 0 && i < (unsigned long) d->rehashidx) {
                 /* Moreover, if we are currently out of range in the second
                  * table, there will be no elements in both tables up to
                  * the current rehashing index, so we jump if possible.
-                 * (this happens when going from big to small table). */
+                 * (this happens when going from big to small table). 
+                 */
                 if (i >= d->ht[1].size) i = d->rehashidx;
                 continue;
             }
@@ -793,7 +797,8 @@ unsigned int dictGetSomeKeys(dict *d, dictEntry **des, unsigned int count) {
             dictEntry *he = d->ht[j].table[i];
 
             /* Count contiguous empty buckets, and jump to other
-             * locations if they reach 'count' (with a minimum of 5). */
+             * locations if they reach 'count' (with a minimum of 5). 
+             */
             if (he == NULL) {
                 emptylen++;
                 if (emptylen >= 5 && emptylen > count) {
@@ -804,7 +809,8 @@ unsigned int dictGetSomeKeys(dict *d, dictEntry **des, unsigned int count) {
                 emptylen = 0;
                 while (he) {
                     /* Collect all the elements of the buckets found non
-                     * empty while iterating. */
+                     * empty while iterating. 
+                     */
                     *des = he;
                     des++;
                     he = he->next;
@@ -819,7 +825,8 @@ unsigned int dictGetSomeKeys(dict *d, dictEntry **des, unsigned int count) {
 }
 
 /* Function to reverse bits. Algorithm from:
- * http://graphics.stanford.edu/~seander/bithacks.html#ReverseParallel */
+ * http://graphics.stanford.edu/~seander/bithacks.html#ReverseParallel 
+ */
 static unsigned long rev(unsigned long v) {
     unsigned long s = 8 * sizeof(v); // bit size; must be power of 2
     unsigned long mask = ~0;
