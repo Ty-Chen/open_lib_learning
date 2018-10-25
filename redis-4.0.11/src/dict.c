@@ -760,7 +760,7 @@ unsigned int dictGetSomeKeys(dict *d, dictEntry **des, unsigned int count)
     unsigned long maxsteps;
 
     if (dictSize(d) < count) count = dictSize(d);
-    maxsteps = count*10;
+    maxsteps = count * 10;
 
     /* Try to do a rehashing work proportional to 'count'. */
     for (j = 0; j < count; j++) {
@@ -819,12 +819,13 @@ unsigned int dictGetSomeKeys(dict *d, dictEntry **des, unsigned int count)
                 }
             }
         }
-        i = (i+1) & maxsizemask;
+        i = (i + 1) & maxsizemask;
     }
     return stored;
 }
 
-/* Function to reverse bits. Algorithm from:
+/* 反转比特位
+ * Function to reverse bits. Algorithm from:
  * http://graphics.stanford.edu/~seander/bithacks.html#ReverseParallel 
  */
 static unsigned long rev(unsigned long v) {
