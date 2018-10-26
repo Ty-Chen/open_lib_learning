@@ -838,7 +838,8 @@ static unsigned long rev(unsigned long v) {
     return v;
 }
 
-/* dictScan() is used to iterate over the elements of a dictionary.
+/* 高级字典迭代器
+ * dictScan() is used to iterate over the elements of a dictionary.
  *
  * Iterating works the following way:
  *
