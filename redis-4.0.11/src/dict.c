@@ -926,7 +926,7 @@ static unsigned long rev(unsigned long v) {
 unsigned long dictScan(dict *d,
                        unsigned long v,
                        dictScanFunction *fn,
-                       dictScanBucketFunction* bucketfn,
+                       dictScanBucketFunction *bucketfn,
                        void *privdata)
 {
     dictht *t0, *t1;
