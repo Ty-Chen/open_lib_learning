@@ -1097,12 +1097,15 @@ uint64_t dictGetHash(dict *d, const void *key) {
     return dictHashKey(d, key);
 }
 
-/* Finds the dictEntry reference by using pointer and pre-calculated hash.
+/* 根据dict中的oldptr找key
+ * Finds the dictEntry reference by using pointer and pre-calculated hash.
  * oldkey is a dead pointer and should not be accessed.
  * the hash value should be provided using dictGetHash.
  * no string / key comparison is performed.
- * return value is the reference to the dictEntry if found, or NULL if not found. */
-dictEntry **dictFindEntryRefByPtrAndHash(dict *d, const void *oldptr, uint64_t hash) {
+ * return value is the reference to the dictEntry if found, or NULL if not found. 
+ */
+dictEntry **dictFindEntryRefByPtrAndHash(dict *d, const void *oldptr, uint64_t hash) 
+{
     dictEntry *he, **heref;
     unsigned long idx, table;
 
