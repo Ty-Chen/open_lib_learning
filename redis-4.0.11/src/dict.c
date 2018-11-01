@@ -1128,7 +1128,8 @@ dictEntry **dictFindEntryRefByPtrAndHash(dict *d, const void *oldptr, uint64_t h
 /* ------------------------------- Debugging ---------------------------------*/
 
 #define DICT_STATS_VECTLEN 50
-size_t _dictGetStatsHt(char *buf, size_t bufsize, dictht *ht, int tableid) {
+size_t _dictGetStatsHt(char *buf, size_t bufsize, dictht *ht, int tableid) 
+{
     unsigned long i, slots = 0, chainlen, maxchainlen = 0;
     unsigned long totchainlen = 0;
     unsigned long clvector[DICT_STATS_VECTLEN];
@@ -1204,7 +1205,7 @@ void dictGetStats(char *buf, size_t bufsize, dict *d) {
     if (orig_bufsize) orig_buf[orig_bufsize-1] = '\0';
 }
 
-/* ------------------------------- Benchmark ---------------------------------*/
+/* ------------------------------- 测试Benchmark ---------------------------------*/
 
 #ifdef DICT_BENCHMARK_MAIN
 
