@@ -1211,11 +1211,13 @@ void dictGetStats(char *buf, size_t bufsize, dict *d) {
 
 #include "sds.h"
 
-uint64_t hashCallback(const void *key) {
+uint64_t hashCallback(const void *key) 
+{
     return dictGenHashFunction((unsigned char*)key, sdslen((char*)key));
 }
 
-int compareCallback(void *privdata, const void *key1, const void *key2) {
+int compareCallback(void *privdata, const void *key1, const void *key2) 
+{
     int l1,l2;
     DICT_NOTUSED(privdata);
 
@@ -1225,13 +1227,15 @@ int compareCallback(void *privdata, const void *key1, const void *key2) {
     return memcmp(key1, key2, l1) == 0;
 }
 
-void freeCallback(void *privdata, void *val) {
+void freeCallback(void *privdata, void *val) 
+{
     DICT_NOTUSED(privdata);
 
     sdsfree(val);
 }
 
-dictType BenchmarkDictType = {
+dictType BenchmarkDictType = 
+{
     hashCallback,
     NULL,
     NULL,
@@ -1247,7 +1251,8 @@ dictType BenchmarkDictType = {
 } while(0);
 
 /* dict-benchmark [count] */
-int main(int argc, char **argv) {
+int main(int argc, char **argv) 
+{
     long j;
     long long start, elapsed;
     dict *dict = dictCreate(&BenchmarkDictType,NULL);
