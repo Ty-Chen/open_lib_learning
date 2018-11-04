@@ -9,6 +9,14 @@
  * ----------------------------------------------------------------------------
  *
  * ZIPLIST OVERALL LAYOUT
+ * 压缩列表概要
+ * ziplist是一个经过特殊编码的双向链表，
+ * 它的设计目标就是为了提高存储效率。
+ * ziplist可以用于存储字符串或整数，
+ * 其中整数是按真正的二进制表示进行编码的，
+ * 而不是编码成字符串序列。
+ * 它能以O(1)的时间复杂度在表的两端提供push和pop操作
+ *
  * ======================
  *
  * The general layout of the ziplist is as follows:
@@ -198,7 +206,7 @@
                                AA BB CC DD are a 4 bytes unsigned integer
                                representing the previous entry len. */
 
-/* Different encoding/length possibilities */
+/*Different encoding/length possibilities */
 #define ZIP_STR_MASK 0xc0
 #define ZIP_INT_MASK 0x30
 #define ZIP_STR_06B (0 << 6)
