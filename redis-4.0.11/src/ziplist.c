@@ -206,7 +206,9 @@
                                AA BB CC DD are a 4 bytes unsigned integer
                                representing the previous entry len. */
 
-/*Different encoding/length possibilities */
+/* 支持的不同类型：不同长度的字符串，整形
+ * Different encoding/length possibilities 
+ */
 #define ZIP_STR_MASK 0xc0
 #define ZIP_INT_MASK 0x30
 #define ZIP_STR_06B (0 << 6)
@@ -218,12 +220,14 @@
 #define ZIP_INT_24B (0xc0 | 3<<4)
 #define ZIP_INT_8B 0xfe
 
-/* 4 bit integer immediate encoding |1111xxxx| with xxxx between
- * 0001 and 1101. */
-#define ZIP_INT_IMM_MASK 0x0f   /* Mask to extract the 4 bits value. To add
+/* 4位整形：最大14
+ * 4 bit integer immediate encoding |1111xxxx| with xxxx between
+ * 0001 and 1101. 
+ */
+#define ZIP_INT_IMM_MASK 0x0f   /* 掩码 Mask to extract the 4 bits value. To add
                                    one is needed to reconstruct the value. */
-#define ZIP_INT_IMM_MIN 0xf1    /* 11110001 */
-#define ZIP_INT_IMM_MAX 0xfd    /* 11111101 */
+#define ZIP_INT_IMM_MIN 0xf1    /* 最小值 11110001 */
+#define ZIP_INT_IMM_MAX 0xfd    /* 最大值不是f 11111101 */
 
 #define INT24_MAX 0x7fffff
 #define INT24_MIN (-INT24_MAX - 1)
