@@ -236,21 +236,31 @@
  * with "11" as most significant bits of the first byte. */
 #define ZIP_IS_STR(enc) (((enc) & ZIP_STR_MASK) < ZIP_STR_MASK)
 
-/* Utility macros.*/
+/* 一些有用的宏
+ * Utility macros.
+ */
 
-/* Return total bytes a ziplist is composed of. */
+/* 返回压缩列表总大小
+ * Return total bytes a ziplist is composed of. 
+ */
 #define ZIPLIST_BYTES(zl)       (*((uint32_t*)(zl)))
 
-/* Return the offset of the last item inside the ziplist. */
-#define ZIPLIST_TAIL_OFFSET(zl) (*((uint32_t*)((zl)+sizeof(uint32_t))))
+/* 返回最后一项的偏移量
+ * Return the offset of the last item inside the ziplist. 
+ */
+#define ZIPLIST_TAIL_OFFSET(zl) (*((uint32_t*)((zl) + sizeof(uint32_t))))
 
-/* Return the length of a ziplist, or UINT16_MAX if the length cannot be
- * determined without scanning the whole ziplist. */
+/* 返回压缩列表的长度
+ * Return the length of a ziplist, or UINT16_MAX if the length cannot be
+ * determined without scanning the whole ziplist. 
+ */
 #define ZIPLIST_LENGTH(zl)      (*((uint16_t*)((zl)+sizeof(uint32_t)*2)))
 
-/* The size of a ziplist header: two 32 bit integers for the total
+/* 返回压缩列表头部大小
+ * The size of a ziplist header: two 32 bit integers for the total
  * bytes count and last item offset. One 16 bit integer for the number
- * of items field. */
+ * of items field. 
+ */
 #define ZIPLIST_HEADER_SIZE     (sizeof(uint32_t)*2+sizeof(uint16_t))
 
 /* Size of the "end of ziplist" entry. Just one byte. */
