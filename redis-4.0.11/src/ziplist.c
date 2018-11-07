@@ -254,37 +254,47 @@
  * Return the length of a ziplist, or UINT16_MAX if the length cannot be
  * determined without scanning the whole ziplist. 
  */
-#define ZIPLIST_LENGTH(zl)      (*((uint16_t*)((zl)+sizeof(uint32_t)*2)))
+#define ZIPLIST_LENGTH(zl)      (*((uint16_t*)((zl) + sizeof(uint32_t) * 2)))
 
 /* 返回压缩列表头部大小
  * The size of a ziplist header: two 32 bit integers for the total
  * bytes count and last item offset. One 16 bit integer for the number
  * of items field. 
  */
-#define ZIPLIST_HEADER_SIZE     (sizeof(uint32_t)*2+sizeof(uint16_t))
+#define ZIPLIST_HEADER_SIZE     (sizeof(uint32_t) * 2 + sizeof(uint16_t))
 
-/* Size of the "end of ziplist" entry. Just one byte. */
+/* 压缩列表尾部大小：1比特
+ * Size of the "end of ziplist" entry. Just one byte. 
+ */
 #define ZIPLIST_END_SIZE        (sizeof(uint8_t))
 
-/* Return the pointer to the first entry of a ziplist. */
-#define ZIPLIST_ENTRY_HEAD(zl)  ((zl)+ZIPLIST_HEADER_SIZE)
+/* 返回压缩列表第一个变量入口地址
+ * Return the pointer to the first entry of a ziplist. 
+ */
+#define ZIPLIST_ENTRY_HEAD(zl)  ((zl) + ZIPLIST_HEADER_SIZE)
 
-/* Return the pointer to the last entry of a ziplist, using the
- * last entry offset inside the ziplist header. */
-#define ZIPLIST_ENTRY_TAIL(zl)  ((zl)+intrev32ifbe(ZIPLIST_TAIL_OFFSET(zl)))
+/* 返回压缩列表最后一个变量入口地址
+ * Return the pointer to the last entry of a ziplist, using the
+ * last entry offset inside the ziplist header. 
+ */
+#define ZIPLIST_ENTRY_TAIL(zl)  ((zl) + intrev32ifbe(ZIPLIST_TAIL_OFFSET(zl)))
 
-/* Return the pointer to the last byte of a ziplist, which is, the
- * end of ziplist FF entry. */
-#define ZIPLIST_ENTRY_END(zl)   ((zl)+intrev32ifbe(ZIPLIST_BYTES(zl))-1)
+/* 返回压缩列表最后一个比特的地址
+ * Return the pointer to the last byte of a ziplist, which is, the
+ * end of ziplist FF entry. 
+ */
+#define ZIPLIST_ENTRY_END(zl)   ((zl) + intrev32ifbe(ZIPLIST_BYTES(zl)) - 1)
 
-/* Increment the number of items field in the ziplist header. Note that this
+/* 增加压缩列表头部项目计数
+ * Increment the number of items field in the ziplist header. Note that this
  * macro should never overflow the unsigned 16 bit integer, since entires are
  * always pushed one at a time. When UINT16_MAX is reached we want the count
  * to stay there to signal that a full scan is needed to get the number of
- * items inside the ziplist. */
-#define ZIPLIST_INCR_LENGTH(zl,incr) { \
+ * items inside the ziplist. 
+ */
+#define ZIPLIST_INCR_LENGTH(zl, incr) { \
     if (ZIPLIST_LENGTH(zl) < UINT16_MAX) \
-        ZIPLIST_LENGTH(zl) = intrev16ifbe(intrev16ifbe(ZIPLIST_LENGTH(zl))+incr); \
+        ZIPLIST_LENGTH(zl) = intrev16ifbe(intrev16ifbe(ZIPLIST_LENGTH(zl)) + incr); \
 }
 
 /* We use this function to receive information about a ziplist entry.
