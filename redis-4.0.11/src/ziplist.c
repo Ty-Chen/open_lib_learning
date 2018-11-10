@@ -356,7 +356,8 @@ unsigned int zipIntSize(unsigned char encoding) {
     return 0;
 }
 
-/* Write the encoidng header of the entry in 'p'. If p is NULL it just returns
+/* 将编码头部存入指针P位置
+ * Write the encoidng header of the entry in 'p'. If p is NULL it just returns
  * the amount of bytes required to encode such a length. Arguments:
  *
  * 'encoding' is the encoding we are using for the entry. It could be
@@ -367,8 +368,10 @@ unsigned int zipIntSize(unsigned char encoding) {
  * srting that this entry represents.
  *
  * The function returns the number of bytes used by the encoding/length
- * header stored in 'p'. */
-unsigned int zipStoreEntryEncoding(unsigned char *p, unsigned char encoding, unsigned int rawlen) {
+ * header stored in 'p'. 
+ */
+unsigned int zipStoreEntryEncoding(unsigned char *p, unsigned char encoding, unsigned int rawlen) 
+{
     unsigned char len = 1, buf[5];
 
     if (ZIP_IS_STR(encoding)) {
@@ -398,16 +401,19 @@ unsigned int zipStoreEntryEncoding(unsigned char *p, unsigned char encoding, uns
     }
 
     /* Store this length at p. */
-    memcpy(p,buf,len);
+    memcpy(p, buf, len);
     return len;
 }
 
-/* Decode the entry encoding type and data length (string length for strings,
+/* 
+ * Decode the entry encoding type and data length (string length for strings,
  * number of bytes used for the integer for integer entries) encoded in 'ptr'.
  * The 'encoding' variable will hold the entry encoding, the 'lensize'
  * variable will hold the number of bytes required to encode the entry
- * length, and the 'len' variable will hold the entry length. */
-#define ZIP_DECODE_LENGTH(ptr, encoding, lensize, len) do {                    \
+ * length, and the 'len' variable will hold the entry length. 
+ */
+#define ZIP_DECODE_LENGTH(ptr, encoding, lensize, len) do 
+{                    \
     ZIP_ENTRY_ENCODING((ptr), (encoding));                                     \
     if ((encoding) < ZIP_STR_MASK) {                                           \
         if ((encoding) == ZIP_STR_06B) {                                       \
