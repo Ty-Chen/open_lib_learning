@@ -405,7 +405,7 @@ unsigned int zipStoreEntryEncoding(unsigned char *p, unsigned char encoding, uns
     return len;
 }
 
-/* 
+/* 对encooding进行解码
  * Decode the entry encoding type and data length (string length for strings,
  * number of bytes used for the integer for integer entries) encoded in 'ptr'.
  * The 'encoding' variable will hold the entry encoding, the 'lensize'
@@ -438,8 +438,10 @@ unsigned int zipStoreEntryEncoding(unsigned char *p, unsigned char encoding, uns
 } while(0);
 
 /* Encode the length of the previous entry and write it to "p". This only
- * uses the larger encoding (required in __ziplistCascadeUpdate). */
-int zipStorePrevEntryLengthLarge(unsigned char *p, unsigned int len) {
+ * uses the larger encoding (required in __ziplistCascadeUpdate). 
+ */
+int zipStorePrevEntryLengthLarge(unsigned char *p, unsigned int len) 
+{
     if (p != NULL) {
         p[0] = ZIP_BIG_PREVLEN;
         memcpy(p+1,&len,sizeof(len));
