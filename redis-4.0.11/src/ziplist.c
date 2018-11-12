@@ -451,8 +451,10 @@ int zipStorePrevEntryLengthLarge(unsigned char *p, unsigned int len)
 }
 
 /* Encode the length of the previous entry and write it to "p". Return the
- * number of bytes needed to encode this length if "p" is NULL. */
-unsigned int zipStorePrevEntryLength(unsigned char *p, unsigned int len) {
+ * number of bytes needed to encode this length if "p" is NULL. 
+ */
+unsigned int zipStorePrevEntryLength(unsigned char *p, unsigned int len) 
+{
     if (p == NULL) {
         return (len < ZIP_BIG_PREVLEN) ? 1 : sizeof(len)+1;
     } else {
