@@ -444,10 +444,10 @@ int zipStorePrevEntryLengthLarge(unsigned char *p, unsigned int len)
 {
     if (p != NULL) {
         p[0] = ZIP_BIG_PREVLEN;
-        memcpy(p+1,&len,sizeof(len));
-        memrev32ifbe(p+1);
+        memcpy(p + 1, &len, sizeof(len));
+        memrev32ifbe(p + 1);
     }
-    return 1+sizeof(len);
+    return 1 + sizeof(len);
 }
 
 /* Encode the length of the previous entry and write it to "p". Return the
@@ -456,13 +456,13 @@ int zipStorePrevEntryLengthLarge(unsigned char *p, unsigned int len)
 unsigned int zipStorePrevEntryLength(unsigned char *p, unsigned int len) 
 {
     if (p == NULL) {
-        return (len < ZIP_BIG_PREVLEN) ? 1 : sizeof(len)+1;
+        return (len < ZIP_BIG_PREVLEN) ? 1 : sizeof(len) + 1;
     } else {
         if (len < ZIP_BIG_PREVLEN) {
             p[0] = len;
             return 1;
         } else {
-            return zipStorePrevEntryLengthLarge(p,len);
+            return zipStorePrevEntryLengthLarge(p, len);
         }
     }
 }
