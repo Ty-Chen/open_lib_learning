@@ -437,7 +437,8 @@ unsigned int zipStoreEntryEncoding(unsigned char *p, unsigned char encoding, uns
     }                                                                          \
 } while(0);
 
-/* Encode the length of the previous entry and write it to "p". This only
+/* 对上一个entry的长度进行编码，写入p指针（仅对大型编码使用）
+ * Encode the length of the previous entry and write it to "p". This only
  * uses the larger encoding (required in __ziplistCascadeUpdate). 
  */
 int zipStorePrevEntryLengthLarge(unsigned char *p, unsigned int len) 
@@ -450,7 +451,8 @@ int zipStorePrevEntryLengthLarge(unsigned char *p, unsigned int len)
     return 1 + sizeof(len);
 }
 
-/* Encode the length of the previous entry and write it to "p". Return the
+/* 对上一个entry的长度进行编码，写入p指针
+ * Encode the length of the previous entry and write it to "p". Return the
  * number of bytes needed to encode this length if "p" is NULL. 
  */
 unsigned int zipStorePrevEntryLength(unsigned char *p, unsigned int len) 
