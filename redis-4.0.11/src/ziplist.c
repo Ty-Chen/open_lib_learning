@@ -511,7 +511,8 @@ unsigned int zipStorePrevEntryLength(unsigned char *p, unsigned int len)
  *
  * So the function returns a positive number if more space is needed,
  * a negative number if less space is needed, or zero if the same space
- * is needed. */
+ * is needed. 
+ */
 int zipPrevLenByteDiff(unsigned char *p, unsigned int len) {
     unsigned int prevlensize;
     ZIP_DECODE_PREVLENSIZE(p, prevlensize);
