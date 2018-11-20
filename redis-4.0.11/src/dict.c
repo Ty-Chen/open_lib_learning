@@ -229,7 +229,10 @@ int dictRehash(dict *d, int n)
         }
 		
         de = d->ht[0].table[d->rehashidx];
-        /* Move all the keys in this bucket from the old to the new hash HT */
+		
+        /* 将哈希表数据移到ht[1]中：平时使用的都是ht[0]
+         * Move all the keys in this bucket from the old to the new hash HT 
+         */
         while(de) {
             uint64_t h;
 
