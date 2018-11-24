@@ -676,8 +676,10 @@ unsigned char *ziplistResize(unsigned char *zl, unsigned int len) {
  * field implies the ziplist is holding large entries anyway.
  *
  * The pointer "p" points to the first entry that does NOT need to be
- * updated, i.e. consecutive fields MAY need an update. */
-unsigned char *__ziplistCascadeUpdate(unsigned char *zl, unsigned char *p) {
+ * updated, i.e. consecutive fields MAY need an update. 
+ */
+unsigned char *__ziplistCascadeUpdate(unsigned char *zl, unsigned char *p) 
+{
     size_t curlen = intrev32ifbe(ZIPLIST_BYTES(zl)), rawlen, rawlensize;
     size_t offset, noffset, extra;
     unsigned char *np;
