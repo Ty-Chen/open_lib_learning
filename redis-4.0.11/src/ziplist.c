@@ -657,7 +657,9 @@ unsigned char *ziplistResize(unsigned char *zl, unsigned int len) {
     return zl;
 }
 
-/* When an entry is inserted, we need to set the prevlen field of the next
+/* 添加新的entry时对prevlen，next entry等的修改可能导致连锁反应：第一位增加
+ * 导致后面每一位都要增加，因此需要进行检测
+ * When an entry is inserted, we need to set the prevlen field of the next
  * entry to equal the length of the inserted entry. It can occur that this
  * length cannot be encoded in 1 byte and the next entry needs to be grow
  * a bit larger to hold the 5-byte encoded prevlen. This can be done for free,
@@ -692,7 +694,7 @@ unsigned char *__ziplistCascadeUpdate(unsigned char *zl, unsigned char *p)
 
         /* Abort if there is no next entry. */
         if (p[rawlen] == ZIP_END) break;
-        zipEntry(p+rawlen, &next);
+        zipEntry(p + rawlen, &next);
 
         /* Abort when "prevlen" has not changed. */
         if (next.prevrawlen == rawlen) break;
