@@ -742,7 +742,9 @@ unsigned char *__ziplistCascadeUpdate(unsigned char *zl, unsigned char *p)
     return zl;
 }
 
-/* Delete "num" entries, starting at "p". Returns pointer to the ziplist. */
+/* 删除从p开始的num个entry
+ * Delete "num" entries, starting at "p". Returns pointer to the ziplist. 
+ */
 unsigned char *__ziplistDelete(unsigned char *zl, unsigned char *p, unsigned int num) {
     unsigned int i, totlen, deleted = 0;
     size_t offset;
