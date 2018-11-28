@@ -765,16 +765,19 @@ unsigned char *__ziplistDelete(unsigned char *zl, unsigned char *p, unsigned int
 
     if (totlen > 0) {
         if (p[0] != ZIP_END) {
-            /* Storing `prevrawlen` in this entry may increase or decrease the
+            /* 比较prevrawlen的大小确认是否需要扩展空间
+             * Storing `prevrawlen` in this entry may increase or decrease the
              * number of bytes required compare to the current `prevrawlen`.
              * There always is room to store this, because it was previously
-             * stored by an entry that is now being deleted. */
+             * stored by an entry that is now being deleted. 
+             */
             nextdiff = zipPrevLenByteDiff(p, first.prevrawlen);
 
             /* Note that there is always space when p jumps backward: if
              * the new previous entry is large, one of the deleted elements
              * had a 5 bytes prevlen header, so there is for sure at least
-             * 5 bytes free and we need just 4. */
+             * 5 bytes free and we need just 4. 
+             */
             p -= nextdiff;
             zipStorePrevEntryLength(p, first.prevrawlen);
 
