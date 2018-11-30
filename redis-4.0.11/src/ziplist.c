@@ -773,7 +773,8 @@ unsigned char *__ziplistDelete(unsigned char *zl, unsigned char *p, unsigned int
              */
             nextdiff = zipPrevLenByteDiff(p, first.prevrawlen);
 
-            /* Note that there is always space when p jumps backward: if
+            /* p后跳通常有足够的空间
+             * Note that there is always space when p jumps backward: if
              * the new previous entry is large, one of the deleted elements
              * had a 5 bytes prevlen header, so there is for sure at least
              * 5 bytes free and we need just 4. 
@@ -787,9 +788,10 @@ unsigned char *__ziplistDelete(unsigned char *zl, unsigned char *p, unsigned int
 
             /* When the tail contains more than one entry, we need to take
              * "nextdiff" in account as well. Otherwise, a change in the
-             * size of prevlen doesn't have an effect on the *tail* offset. */
+             * size of prevlen doesn't have an effect on the *tail* offset. 
+             */
             zipEntry(p, &tail);
-            if (p[tail.headersize+tail.len] != ZIP_END) {
+            if (p[tail.headersize + tail.len] != ZIP_END) {
                 ZIPLIST_TAIL_OFFSET(zl) =
                    intrev32ifbe(intrev32ifbe(ZIPLIST_TAIL_OFFSET(zl)) + nextdiff);
             }
