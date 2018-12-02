@@ -829,9 +829,13 @@ unsigned char *__ziplistInsert(unsigned char *zl, unsigned char *p, unsigned cha
     size_t offset;
     int nextdiff = 0;
     unsigned char encoding = 0;
-    long long value = 123456789; /* initialized to avoid warning. Using a value
-                                    that is easy to see if for some reason
-                                    we use it uninitialized. */
+	
+	/* 为避免未初始化warning报错初始化赋值
+	 * initialized to avoid warning. Using a value
+	 * that is easy to see if for some reason
+	 * we use it uninitialized. 
+	 */	
+    long long value = 123456789; 
     zlentry tail;
 
     /* Find out prevlen for the entry that is inserted. */
