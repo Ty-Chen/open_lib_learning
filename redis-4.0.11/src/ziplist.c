@@ -413,7 +413,7 @@ unsigned int zipStoreEntryEncoding(unsigned char *p, unsigned char encoding, uns
  * length, and the 'len' variable will hold the entry length. 
  */
 #define ZIP_DECODE_LENGTH(ptr, encoding, lensize, len) do 
-{                    \
+{                    														   \
     ZIP_ENTRY_ENCODING((ptr), (encoding));                                     \
     if ((encoding) < ZIP_STR_MASK) {                                           \
         if ((encoding) == ZIP_STR_06B) {                                       \
@@ -491,7 +491,7 @@ unsigned int zipStorePrevEntryLength(unsigned char *p, unsigned int len)
     if ((prevlensize) == 1) {                                                  \
         (prevlen) = (ptr)[0];                                                  \
     } else if ((prevlensize) == 5) {                                           \
-        assert(sizeof((prevlen)) == 4);                                    \
+        assert(sizeof((prevlen)) == 4);                                        \
         memcpy(&(prevlen), ((char*)(ptr)) + 1, 4);                             \
         memrev32ifbe(&prevlen);                                                \
     }                                                                          \
@@ -925,7 +925,9 @@ unsigned char *__ziplistInsert(unsigned char *zl, unsigned char *p, unsigned cha
     return zl;
 }
 
-/* Merge ziplists 'first' and 'second' by appending 'second' to 'first'.
+/* 合并两个压缩列表：重新配置较大的表，合并另一个表
+ * 并入的旧有列表清空释放资源
+ * Merge ziplists 'first' and 'second' by appending 'second' to 'first'.
  *
  * NOTE: The larger ziplist is reallocated to contain the new merged ziplist.
  * Either 'first' or 'second' can be used for the result.  The parameter not
@@ -940,7 +942,8 @@ unsigned char *__ziplistInsert(unsigned char *zl, unsigned char *p, unsigned cha
  * On success: returns the merged ziplist (which is expanded version of either
  * 'first' or 'second', also frees the other unused input ziplist, and sets the
  * input ziplist argument equal to newly reallocated ziplist return value. */
-unsigned char *ziplistMerge(unsigned char **first, unsigned char **second) {
+unsigned char *ziplistMerge(unsigned char **first, unsigned char **second) 
+{
     /* If any params are null, we can't merge, so NULL. */
     if (first == NULL || *first == NULL || second == NULL || *second == NULL)
         return NULL;
