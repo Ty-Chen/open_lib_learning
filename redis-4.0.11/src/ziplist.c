@@ -961,9 +961,12 @@ unsigned char *ziplistMerge(unsigned char **first, unsigned char **second)
     int append;
     unsigned char *source, *target;
     size_t target_bytes, source_bytes;
-    /* Pick the largest ziplist so we can resize easily in-place.
+	
+    /* 选择较大的压缩列表
+     * Pick the largest ziplist so we can resize easily in-place.
      * We must also track if we are now appending or prepending to
-     * the target ziplist. */
+     * the target ziplist. 
+     */
     if (first_len >= second_len) {
         /* retain first, append second to first. */
         target = *first;
@@ -980,7 +983,9 @@ unsigned char *ziplistMerge(unsigned char **first, unsigned char **second)
         append = 0;
     }
 
-    /* Calculate final bytes (subtract one pair of metadata) */
+    /* 计算合并后的字节、长度
+     * Calculate final bytes (subtract one pair of metadata) 
+     */
     size_t zlbytes = first_bytes + second_bytes -
                      ZIPLIST_HEADER_SIZE - ZIPLIST_END_SIZE;
     size_t zllength = first_len + second_len;
