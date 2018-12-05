@@ -1020,11 +1020,13 @@ unsigned char *ziplistMerge(unsigned char **first, unsigned char **second)
     /* Update header metadata. */
     ZIPLIST_BYTES(target) = intrev32ifbe(zlbytes);
     ZIPLIST_LENGTH(target) = intrev16ifbe(zllength);
+	
     /* New tail offset is:
      *   + N bytes of first ziplist
      *   - 1 byte for [END] of first ziplist
      *   + M bytes for the offset of the original tail of the second ziplist
-     *   - J bytes for HEADER because second_offset keeps no header. */
+     *   - J bytes for HEADER because second_offset keeps no header. 
+     */
     ZIPLIST_TAIL_OFFSET(target) = intrev32ifbe(
                                    (first_bytes - ZIPLIST_END_SIZE) +
                                    (second_offset - ZIPLIST_HEADER_SIZE));
@@ -1032,7 +1034,8 @@ unsigned char *ziplistMerge(unsigned char **first, unsigned char **second)
     /* __ziplistCascadeUpdate just fixes the prev length values until it finds a
      * correct prev length value (then it assumes the rest of the list is okay).
      * We tell CascadeUpdate to start at the first ziplist's tail element to fix
-     * the merge seam. */
+     * the merge seam. 
+     */
     target = __ziplistCascadeUpdate(target, target+first_offset);
 
     /* Now free and NULL out what we didn't realloc */
@@ -1056,7 +1059,8 @@ unsigned char *ziplistPush(unsigned char *zl, unsigned char *s, unsigned int sle
 
 /* Returns an offset to use for iterating with ziplistNext. When the given
  * index is negative, the list is traversed back to front. When the list
- * doesn't contain an element at the provided index, NULL is returned. */
+ * doesn't contain an element at the provided index, NULL is returned. 
+ */
 unsigned char *ziplistIndex(unsigned char *zl, int index) {
     unsigned char *p;
     unsigned int prevlensize, prevlen = 0;
