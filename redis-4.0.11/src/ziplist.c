@@ -1095,7 +1095,8 @@ unsigned char *ziplistNext(unsigned char *zl, unsigned char *p) {
 
     /* "p" could be equal to ZIP_END, caused by ziplistDelete,
      * and we should return NULL. Otherwise, we should return NULL
-     * when the *next* element is ZIP_END (there is no next entry). */
+     * when the *next* element is ZIP_END (there is no next entry). 
+     */
     if (p[0] == ZIP_END) {
         return NULL;
     }
