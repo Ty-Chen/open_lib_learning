@@ -990,10 +990,14 @@ unsigned char *ziplistMerge(unsigned char **first, unsigned char **second)
                      ZIPLIST_HEADER_SIZE - ZIPLIST_END_SIZE;
     size_t zllength = first_len + second_len;
 
-    /* Combined zl length should be limited within UINT16_MAX */
+    /* 判断合并后是否越界
+     * Combined zl length should be limited within UINT16_MAX 
+     */
     zllength = zllength < UINT16_MAX ? zllength : UINT16_MAX;
 
-    /* Save offset positions before we start ripping memory apart. */
+    /* 保存偏移位置
+     * Save offset positions before we start ripping memory apart. 
+     */
     size_t first_offset = intrev32ifbe(ZIPLIST_TAIL_OFFSET(*first));
     size_t second_offset = intrev32ifbe(ZIPLIST_TAIL_OFFSET(*second));
 
@@ -1002,7 +1006,8 @@ unsigned char *ziplistMerge(unsigned char **first, unsigned char **second)
     if (append) {
         /* append == appending to target */
         /* Copy source after target (copying over original [END]):
-         *   [TARGET - END, SOURCE - HEADER] */
+         *   [TARGET - END, SOURCE - HEADER] 
+         */
         memcpy(target + target_bytes - ZIPLIST_END_SIZE,
                source + ZIPLIST_HEADER_SIZE,
                source_bytes - ZIPLIST_HEADER_SIZE);
