@@ -1001,8 +1001,12 @@ unsigned char *ziplistMerge(unsigned char **first, unsigned char **second)
     size_t first_offset = intrev32ifbe(ZIPLIST_TAIL_OFFSET(*first));
     size_t second_offset = intrev32ifbe(ZIPLIST_TAIL_OFFSET(*second));
 
-    /* Extend target to new zlbytes then append or prepend source. */
+    /* 重新分配空间
+     * Extend target to new zlbytes then append or prepend source. 
+     */
     target = zrealloc(target, zlbytes);
+	
+	/*append大于0表示插入第一个列表，等于0则插入第二个列表*/
     if (append) {
         /* append == appending to target */
         /* Copy source after target (copying over original [END]):
@@ -1022,7 +1026,9 @@ unsigned char *ziplistMerge(unsigned char **first, unsigned char **second)
         memcpy(target, source, source_bytes - ZIPLIST_END_SIZE);
     }
 
-    /* Update header metadata. */
+    /* 更新头部数据
+     * Update header metadata. 
+     */
     ZIPLIST_BYTES(target) = intrev32ifbe(zlbytes);
     ZIPLIST_LENGTH(target) = intrev16ifbe(zllength);
 	
