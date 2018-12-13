@@ -1032,7 +1032,8 @@ unsigned char *ziplistMerge(unsigned char **first, unsigned char **second)
     ZIPLIST_BYTES(target) = intrev32ifbe(zlbytes);
     ZIPLIST_LENGTH(target) = intrev16ifbe(zllength);
 	
-    /* New tail offset is:
+    /* 计算新的偏移量
+     * New tail offset is:
      *   + N bytes of first ziplist
      *   - 1 byte for [END] of first ziplist
      *   + M bytes for the offset of the original tail of the second ziplist
@@ -1065,7 +1066,7 @@ unsigned char *ziplistMerge(unsigned char **first, unsigned char **second)
 unsigned char *ziplistPush(unsigned char *zl, unsigned char *s, unsigned int slen, int where) {
     unsigned char *p;
     p = (where == ZIPLIST_HEAD) ? ZIPLIST_ENTRY_HEAD(zl) : ZIPLIST_ENTRY_END(zl);
-    return __ziplistInsert(zl,p,s,slen);
+    return __ziplistInsert(zl, p, s, slen);
 }
 
 /* Returns an offset to use for iterating with ziplistNext. When the given
