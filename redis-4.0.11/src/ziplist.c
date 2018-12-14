@@ -1069,7 +1069,8 @@ unsigned char *ziplistPush(unsigned char *zl, unsigned char *s, unsigned int sle
     return __ziplistInsert(zl, p, s, slen);
 }
 
-/* Returns an offset to use for iterating with ziplistNext. When the given
+/* 返回压缩列表迭代器的偏移量，index为负则指向前一个偏移量
+ * Returns an offset to use for iterating with ziplistNext. When the given
  * index is negative, the list is traversed back to front. When the list
  * doesn't contain an element at the provided index, NULL is returned. 
  */
@@ -1113,7 +1114,7 @@ unsigned char *ziplistNext(unsigned char *zl, unsigned char *p) {
         return NULL;
     }
 
-    p += zipRawEntryLength(p);
+    p += zipRawEntryLength(p); 
     if (p[0] == ZIP_END) {
         return NULL;
     }
