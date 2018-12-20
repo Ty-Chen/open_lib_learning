@@ -1096,7 +1096,8 @@ unsigned char *ziplistIndex(unsigned char *zl, int index) {
     return (p[0] == ZIP_END || index > 0) ? NULL : p;
 }
 
-/* Return pointer to next entry in ziplist.
+/* 
+ * Return pointer to next entry in ziplist.
  *
  * zl is the pointer to the ziplist
  * p is the pointer to the current element
