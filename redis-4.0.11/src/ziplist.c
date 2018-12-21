@@ -1096,7 +1096,7 @@ unsigned char *ziplistIndex(unsigned char *zl, int index) {
     return (p[0] == ZIP_END || index > 0) ? NULL : p;
 }
 
-/* 
+/* 返回压缩列表下一项的指针
  * Return pointer to next entry in ziplist.
  *
  * zl is the pointer to the ziplist
@@ -1104,7 +1104,8 @@ unsigned char *ziplistIndex(unsigned char *zl, int index) {
  *
  * The element after 'p' is returned, otherwise NULL if we are at the end. 
  */
-unsigned char *ziplistNext(unsigned char *zl, unsigned char *p) {
+unsigned char *ziplistNext(unsigned char *zl, unsigned char *p) 
+{
     ((void) zl);
 
     /* "p" could be equal to ZIP_END, caused by ziplistDelete,
