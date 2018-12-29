@@ -1124,13 +1124,16 @@ unsigned char *ziplistNext(unsigned char *zl, unsigned char *p)
     return p;
 }
 
-/* Return pointer to previous entry in ziplist. */
+/* 返回压缩列表上一项
+ * Return pointer to previous entry in ziplist. 
+ */
 unsigned char *ziplistPrev(unsigned char *zl, unsigned char *p) {
     unsigned int prevlensize, prevlen = 0;
 
     /* Iterating backwards from ZIP_END should return the tail. When "p" is
      * equal to the first element of the list, we're already at the head,
-     * and should return NULL. */
+     * and should return NULL. 
+     */
     if (p[0] == ZIP_END) {
         p = ZIPLIST_ENTRY_TAIL(zl);
         return (p[0] == ZIP_END) ? NULL : p;
