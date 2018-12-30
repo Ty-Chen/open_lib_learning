@@ -1169,14 +1169,17 @@ unsigned int ziplistGet(unsigned char *p, unsigned char **sstr, unsigned int *sl
     return 1;
 }
 
-/* Insert an entry at "p". */
+/* 在p位置插入表项
+ * Insert an entry at "p". 
+ */
 unsigned char *ziplistInsert(unsigned char *zl, unsigned char *p, unsigned char *s, unsigned int slen) {
-    return __ziplistInsert(zl,p,s,slen);
+    return __ziplistInsert(zl, p, s, slen);
 }
 
 /* Delete a single entry from the ziplist, pointed to by *p.
  * Also update *p in place, to be able to iterate over the
- * ziplist, while deleting entries. */
+ * ziplist, while deleting entries. 
+ */
 unsigned char *ziplistDelete(unsigned char *zl, unsigned char **p) {
     size_t offset = *p-zl;
     zl = __ziplistDelete(zl,*p,1);
@@ -1184,7 +1187,8 @@ unsigned char *ziplistDelete(unsigned char *zl, unsigned char **p) {
     /* Store pointer to current element in p, because ziplistDelete will
      * do a realloc which might result in a different "zl"-pointer.
      * When the delete direction is back to front, we might delete the last
-     * entry and end up with "p" pointing to ZIP_END, so check this. */
+     * entry and end up with "p" pointing to ZIP_END, so check this. 
+     */
     *p = zl+offset;
     return zl;
 }
