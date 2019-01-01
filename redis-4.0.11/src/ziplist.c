@@ -1176,7 +1176,8 @@ unsigned char *ziplistInsert(unsigned char *zl, unsigned char *p, unsigned char 
     return __ziplistInsert(zl, p, s, slen);
 }
 
-/* Delete a single entry from the ziplist, pointed to by *p.
+/* 删除压缩列表表项
+ * Delete a single entry from the ziplist, pointed to by *p.
  * Also update *p in place, to be able to iterate over the
  * ziplist, while deleting entries. 
  */
