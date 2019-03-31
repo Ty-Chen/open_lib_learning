@@ -35,7 +35,7 @@
 #include <math.h>
 
 /* The Redis HyperLogLog implementation is based on the following ideas:
- *
+ * 不精确的去重计数方案
  * * The use of a 64 bit hash function as proposed in [1], in order to don't
  *   limited to cardinalities up to 10^9, at the cost of just 1 additional
  *   bit per register.
@@ -54,7 +54,7 @@
  *     analysis of a near-optimal cardinality estimation algorithm.
  *
  * Redis uses two representations:
- *
+ * 密集存储和稀疏存储
  * 1) A "dense" representation where every entry is represented by
  *    a 6-bit integer.
  * 2) A "sparse" representation using run length compression suitable
