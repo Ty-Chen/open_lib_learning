@@ -192,7 +192,7 @@ struct hllhdr {
 #define HLL_INVALIDATE_CACHE(hdr) (hdr)->card[7] |= (1<<7)
 #define HLL_VALID_CACHE(hdr) (((hdr)->card[7] & (1<<7)) == 0)
 
-#define HLL_P 14 /* 容错率 The greater is P, the smaller the error. */
+#define HLL_P 14 /* The greater is P, the smaller the error. */
 #define HLL_REGISTERS (1<<HLL_P) /* With P=14, 16384 registers. */
 #define HLL_P_MASK (HLL_REGISTERS-1) /* Mask to index register. */
 #define HLL_BITS 6 /* Enough to count up to 63 leading zeroes. */
