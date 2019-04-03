@@ -36,6 +36,7 @@
 
 /* The Redis HyperLogLog implementation is based on the following ideas:
  * 不精确的去重计数方案
+ *
  * * The use of a 64 bit hash function as proposed in [1], in order to don't
  *   limited to cardinalities up to 10^9, at the cost of just 1 additional
  *   bit per register.
