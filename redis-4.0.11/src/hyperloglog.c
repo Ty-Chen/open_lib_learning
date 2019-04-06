@@ -389,7 +389,8 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
 
 /* ========================= HyperLogLog algorithm  ========================= */
 
-/* Our hash function is MurmurHash2, 64 bit version.
+/* 算法实现
+ * Our hash function is MurmurHash2, 64 bit version.
  * It was modified for Redis in order to provide the same result in
  * big and little endian archs (endian neutral). */
 uint64_t MurmurHash64A (const void * key, int len, unsigned int seed) {
