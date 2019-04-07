@@ -389,7 +389,7 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
 
 /* ========================= HyperLogLog algorithm  ========================= */
 
-/* 算法实现
+/* 哈希算法
  * Our hash function is MurmurHash2, 64 bit version.
  * It was modified for Redis in order to provide the same result in
  * big and little endian archs (endian neutral). */
@@ -445,7 +445,8 @@ uint64_t MurmurHash64A (const void * key, int len, unsigned int seed) {
     return h;
 }
 
-/* Given a string element to add to the HyperLogLog, returns the length
+/* String类型的元素加入，哈希之后统计连续0个数
+ * Given a string element to add to the HyperLogLog, returns the length
  * of the pattern 000..1 of the element hash. As a side effect 'regp' is
  * set to the register index this element hashes to. */
 int hllPatLen(unsigned char *ele, size_t elesize, long *regp) {
