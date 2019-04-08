@@ -1023,7 +1023,8 @@ uint64_t hllCount(struct hllhdr *hdr, int *invalid) {
     /* Apply loglog-beta to the raw estimate. See:
      * "LogLog-Beta and More: A New Algorithm for Cardinality Estimation
      * Based on LogLog Counting" Jason Qin, Denys Kim, Yumei Tung
-     * arXiv:1612.02284 */
+     * arXiv:1612.02284 
+     */
     double zl = log(ez + 1);
     double beta = -0.370393911*ez +
                    0.070471823*zl +
