@@ -478,8 +478,9 @@ int hllPatLen(unsigned char *ele, size_t elesize, long *regp) {
 }
 
 /* ================== Dense representation implementation  ================== */
-
-/* Low level function to set the dense HLL register at 'index' to the
+//密集存储实现
+/* 重新设置桶类计数
+ * Low level function to set the dense HLL register at 'index' to the
  * specified value if the current value is smaller than 'count'.
  *
  * 'registers' is expected to have room for HLL_REGISTERS plus an
