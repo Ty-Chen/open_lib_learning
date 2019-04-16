@@ -502,7 +502,8 @@ int hllDenseSet(uint8_t *registers, long index, uint8_t count) {
     }
 }
 
-/* "Add" the element in the dense hyperloglog data structure.
+/* 调用hllDenseSet对新加入元素的判断：是否需要改变桶大小
+ * "Add" the element in the dense hyperloglog data structure.
  * Actually nothing is added, but the max 0 pattern counter of the subset
  * the element belongs to is incremented if needed.
  *
@@ -511,11 +512,15 @@ int hllDenseSet(uint8_t *registers, long index, uint8_t count) {
 int hllDenseAdd(uint8_t *registers, unsigned char *ele, size_t elesize) {
     long index;
     uint8_t count = hllPatLen(ele,elesize,&index);
-    /* Update the register if this element produced a longer run of zeroes. */
+	
+    /* 如果比现有的最大值还大，则添加该值到数据部分
+     * Update the register if this element produced a longer run of zeroes. 
+     */
     return hllDenseSet(registers,index,count);
 }
 
-/* Compute SUM(2^-reg) in the dense representation.
+/* 计算和
+ * Compute SUM(2^-reg) in the dense representation.
  * PE is an array with a pre-computer table of values 2^-reg indexed by reg.
  * As a side effect the integer pointed by 'ezp' is set to the number
  * of zero registers. */
@@ -577,7 +582,8 @@ double hllDenseSum(uint8_t *registers, double *PE, int *ezp) {
 
 /* ================== Sparse representation implementation  ================= */
 
-/* Convert the HLL with sparse representation given as input in its dense
+/* 将稀疏存储改变为密集存储
+ * Convert the HLL with sparse representation given as input in its dense
  * representation. Both representations are represented by SDS strings, and
  * the input representation is freed as a side effect.
  *
@@ -593,15 +599,18 @@ int hllSparseToDense(robj *o) {
     hdr = (struct hllhdr*) sparse;
     if (hdr->encoding == HLL_DENSE) return C_OK;
 
-    /* Create a string of the right size filled with zero bytes.
+    /* 创建新的基数为0的dense
+     * Create a string of the right size filled with zero bytes.
      * Note that the cached cardinality is set to 0 as a side effect
-     * that is exactly the cardinality of an empty HLL. */
+     * that is exactly the cardinality of an empty HLL. 
+     */
     dense = sdsnewlen(NULL,HLL_DENSE_SIZE);
     hdr = (struct hllhdr*) dense;
     *hdr = *oldhdr; /* This will copy the magic and cached cardinality. */
     hdr->encoding = HLL_DENSE;
 
-    /* Now read the sparse representation and set non-zero registers
+    /* 读取稀疏存储并赋值给密集存储
+     * Now read the sparse representation and set non-zero registers
      * accordingly. */
     p += HLL_HDR_SIZE;
     while(p < end) {
@@ -637,7 +646,8 @@ int hllSparseToDense(robj *o) {
     return C_OK;
 }
 
-/* Low level function to set the sparse HLL register at 'index' to the
+/* 稀疏存储赋值，可能会改变稀疏存储转为密集存储
+ * Low level function to set the sparse HLL register at 'index' to the
  * specified value if the current value is smaller than 'count'.
  *
  * The object 'o' is the String object holding the HLL. The function requires
