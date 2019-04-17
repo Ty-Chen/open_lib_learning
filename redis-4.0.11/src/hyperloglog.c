@@ -668,15 +668,19 @@ int hllSparseSet(robj *o, long index, uint8_t count) {
     long first, span;
     long is_zero = 0, is_xzero = 0, is_val = 0, runlen = 0;
 
-    /* If the count is too big to be representable by the sparse representation
-     * switch to dense representation. */
+    /* 数据过多则改用密集存储
+     * If the count is too big to be representable by the sparse representation
+     * switch to dense representation. 
+     */
     if (count > HLL_SPARSE_VAL_MAX_VALUE) goto promote;
 
-    /* When updating a sparse representation, sometimes we may need to
+    /* 扩展空间
+     * When updating a sparse representation, sometimes we may need to
      * enlarge the buffer for up to 3 bytes in the worst case (XZERO split
      * into XZERO-VAL-XZERO). Make sure there is enough space right now
      * so that the pointers we take during the execution of the function
-     * will be valid all the time. */
+     * will be valid all the time. 
+     */
     o->ptr = sdsMakeRoomFor(o->ptr,3);
 
     /* Step 1: we need to locate the opcode we need to modify to check
