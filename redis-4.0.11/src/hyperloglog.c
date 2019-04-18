@@ -683,7 +683,8 @@ int hllSparseSet(robj *o, long index, uint8_t count) {
      */
     o->ptr = sdsMakeRoomFor(o->ptr,3);
 
-    /* Step 1: we need to locate the opcode we need to modify to check
+    /* 第一步：检测是否需要修改桶
+     * Step 1: we need to locate the opcode we need to modify to check
      * if a value update is actually needed. */
     sparse = p = ((uint8_t*)o->ptr) + HLL_HDR_SIZE;
     end = p + sdslen(o->ptr) - HLL_HDR_SIZE;
