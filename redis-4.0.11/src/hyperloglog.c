@@ -735,7 +735,8 @@ int hllSparseSet(robj *o, long index, uint8_t count) {
         runlen = HLL_SPARSE_VAL_LEN(p);
     }
 
-    /* 第二步，根据不同情况
+    /* 第二步，根据不同情况选择
+     * 小于现值则不变，大于则调用API修改
      * Step 2: After the loop:
      *
      * 'first' stores to the index of the first register covered
