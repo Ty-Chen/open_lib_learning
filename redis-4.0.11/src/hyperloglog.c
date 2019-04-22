@@ -736,7 +736,7 @@ int hllSparseSet(robj *o, long index, uint8_t count) {
     }
 
     /* 第二步，根据不同情况选择
-     * 小于现值则不变，大于则调用API修改
+     * 小于现值则不变，大于则调用API修改，原值为0则直接替换
      * Step 2: After the loop:
      *
      * 'first' stores to the index of the first register covered
