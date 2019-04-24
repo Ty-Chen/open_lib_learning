@@ -103,6 +103,7 @@
  *
  * 使用ZERO,XZERO和VAL来表示稀疏存储（差别是数量的多少）
  * XZERO和VAL长度为1，XZERO长度为2
+ * 
  * The sparse representation encodes registers using a run length
  * encoding composed of three opcodes, two using one byte, and one using
  * of two bytes. The opcodes are called ZERO, XZERO and VAL.
