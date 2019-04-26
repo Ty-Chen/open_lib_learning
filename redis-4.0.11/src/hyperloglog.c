@@ -104,7 +104,7 @@
  * 使用ZERO,XZERO和VAL来表示稀疏存储
  * XZERO和VAL长度为1，XZERO长度为2
  * ZERO和XZERO分别表示连续64个以内和连续16384个以内的连续的0 
- * VAL表示连续32个以内的1
+ * VAL表示连续32个以内的1，超过32个则改用密集存储
  *
  * The sparse representation encodes registers using a run length
  * encoding composed of three opcodes, two using one byte, and one using
