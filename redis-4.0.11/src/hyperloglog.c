@@ -652,6 +652,7 @@ int hllSparseToDense(robj *o) {
 }
 
 /* 稀疏存储赋值，可能会改变稀疏存储转为密集存储
+ * 还需要考虑ZERO, XZERO和VAL的变化
  * Low level function to set the sparse HLL register at 'index' to the
  * specified value if the current value is smaller than 'count'.
  *
