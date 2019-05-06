@@ -102,7 +102,7 @@
  * ===
  *
  * 使用ZERO,XZERO和VAL来表示稀疏存储
- * XZERO和VAL长度为1，XZERO长度为2
+ * ZERO和VAL长度为1，XZERO长度为2
  * ZERO和XZERO分别表示连续64个以内和连续16384个以内的连续的0 
  * VAL表示连续32个以内的1，超过32个则改用密集存储
  *
@@ -653,6 +653,7 @@ int hllSparseToDense(robj *o) {
 
 /* 稀疏存储赋值，可能会改变稀疏存储转为密集存储
  * 还需要考虑ZERO, XZERO和VAL的变化
+ * 
  * Low level function to set the sparse HLL register at 'index' to the
  * specified value if the current value is smaller than 'count'.
  *
@@ -727,7 +728,8 @@ int hllSparseSet(robj *o, long index, uint8_t count) {
     next = HLL_SPARSE_IS_XZERO(p) ? p+2 : p+1;
     if (next >= end) next = NULL;
 
-    /* Cache current opcode type to avoid using the macro again and
+    /* 存储当前类型
+     * Cache current opcode type to avoid using the macro again and
      * again for something that will not change.
      * Also cache the run-length of the opcode. */
     if (HLL_SPARSE_IS_ZERO(p)) {
@@ -742,7 +744,9 @@ int hllSparseSet(robj *o, long index, uint8_t count) {
     }
 
     /* 第二步，根据不同情况选择
-     * 小于现值则不变，大于则调用API修改，原值为0则直接替换
+     * 原值为VAL：小于现值则不变，大于则调用API修改
+     * 原值为ZERO则直接替换为VAL
+     *
      * Step 2: After the loop:
      *
      * 'first' stores to the index of the first register covered
