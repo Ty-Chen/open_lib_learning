@@ -394,7 +394,7 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
 
 /* ========================= HyperLogLog algorithm  ========================= */
 
-/* 哈希算法
+/* MurmurHash2哈希算法
  * Our hash function is MurmurHash2, 64 bit version.
  * It was modified for Redis in order to provide the same result in
  * big and little endian archs (endian neutral). */
@@ -744,8 +744,13 @@ int hllSparseSet(robj *o, long index, uint8_t count) {
     }
 
     /* 第二步，根据不同情况选择
+     *
+     * 1. len = 1的时候
      * 原值为VAL：小于现值则不变，大于则调用API修改
      * 原值为ZERO则直接替换为VAL
+     *  
+     * 2. len > 1的时候
+     * 无论原值为哪种都需要调整为XZERO - VAL - XZERO的结合体
      *
      * Step 2: After the loop:
      *
@@ -848,7 +853,8 @@ int hllSparseSet(robj *o, long index, uint8_t count) {
         }
     }
 
-    /* Step 3: substitute the new sequence with the old one.
+    /* 第三步：替换旧的序列
+     * Step 3: substitute the new sequence with the old one.
      *
      * Note that we already allocated space on the sds string
      * calling sdsMakeRoomFor(). */
@@ -864,7 +870,8 @@ int hllSparseSet(robj *o, long index, uint8_t count) {
      end += deltalen;
 
 updated:
-    /* Step 4: Merge adjacent values if possible.
+    /* 第四步：优化。相邻的VAL有时候可以合并
+     * Step 4: Merge adjacent values if possible.
      *
      * The representation was updated, however the resulting representation
      * may not be optimal: adjacent VAL opcodes can sometimes be merged into
