@@ -917,7 +917,8 @@ promote: /* Promote to dense representation. */
     if (hllSparseToDense(o) == C_ERR) return -1; /* Corrupted HLL. */
     hdr = o->ptr;
 
-    /* We need to call hllDenseAdd() to perform the operation after the
+    /* 重新设置hllDense
+     * We need to call hllDenseAdd() to perform the operation after the
      * conversion. However the result must be 1, since if we need to
      * convert from sparse to dense a register requires to be updated.
      *
