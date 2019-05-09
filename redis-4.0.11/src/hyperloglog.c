@@ -930,7 +930,8 @@ promote: /* Promote to dense representation. */
     return dense_retval;
 }
 
-/* "Add" the element in the sparse hyperloglog data structure.
+/* 对hllSparseSet的封装函数
+ * "Add" the element in the sparse hyperloglog data structure.
  * Actually nothing is added, but the max 0 pattern counter of the subset
  * the element belongs to is incremented if needed.
  *
@@ -943,7 +944,8 @@ int hllSparseAdd(robj *o, unsigned char *ele, size_t elesize) {
     return hllSparseSet(o,index,count);
 }
 
-/* Compute SUM(2^-reg) in the sparse representation.
+/* 计算稀疏矩阵的和
+ * Compute SUM(2^-reg) in the sparse representation.
  * PE is an array with a pre-computer table of values 2^-reg indexed by reg.
  * As a side effect the integer pointed by 'ezp' is set to the number
  * of zero registers. */
