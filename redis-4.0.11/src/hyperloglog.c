@@ -982,10 +982,12 @@ double hllSparseSum(uint8_t *sparse, int sparselen, double *PE, int *ezp, int *i
 }
 
 /* ========================= HyperLogLog Count ==============================
+ * hyperloglog近似统计算法
  * This is the core of the algorithm where the approximated count is computed.
  * The function uses the lower level hllDenseSum() and hllSparseSum() functions
  * as helpers to compute the SUM(2^-reg) part of the computation, which is
- * representation-specific, while all the rest is common. */
+ * representation-specific, while all the rest is common. 
+ */
 
 /* Implements the SUM operation for uint8_t data type which is only used
  * internally as speedup for PFCOUNT with multiple keys. */
