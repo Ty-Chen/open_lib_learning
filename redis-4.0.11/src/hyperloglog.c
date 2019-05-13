@@ -989,8 +989,10 @@ double hllSparseSum(uint8_t *sparse, int sparselen, double *PE, int *ezp, int *i
  * representation-specific, while all the rest is common. 
  */
 
-/* Implements the SUM operation for uint8_t data type which is only used
- * internally as speedup for PFCOUNT with multiple keys. */
+/* 内部加速计算函数，由于计算小型求和
+ * Implements the SUM operation for uint8_t data type which is only used
+ * internally as speedup for PFCOUNT with multiple keys. 
+ */
 double hllRawSum(uint8_t *registers, double *PE, int *ezp) {
     double E = 0;
     int j, ez = 0;
@@ -1019,7 +1021,8 @@ double hllRawSum(uint8_t *registers, double *PE, int *ezp) {
     return E;
 }
 
-/* Return the approximated cardinality of the set based on the harmonic
+/* 计算并返回近似基数
+ * Return the approximated cardinality of the set based on the harmonic
  * mean of the registers values. 'hdr' points to the start of the SDS
  * representing the String object holding the HLL representation.
  *
@@ -1029,7 +1032,8 @@ double hllRawSum(uint8_t *registers, double *PE, int *ezp) {
  * hllCount() supports a special internal-only encoding of HLL_RAW, that
  * is, hdr->registers will point to an uint8_t array of HLL_REGISTERS element.
  * This is useful in order to speedup PFCOUNT when called against multiple
- * keys (no need to work with 6-bit integers encoding). */
+ * keys (no need to work with 6-bit integers encoding). 
+ */
 uint64_t hllCount(struct hllhdr *hdr, int *invalid) {
     double m = HLL_REGISTERS;
     double E, alpha = 0.7213/(1+1.079/m);
