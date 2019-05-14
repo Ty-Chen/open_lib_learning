@@ -1144,8 +1144,10 @@ int hllMerge(uint8_t *max, robj *hll) {
 
 /* ========================== HyperLogLog commands ========================== */
 
-/* Create an HLL object. We always create the HLL using sparse encoding.
- * This will be upgraded to the dense representation as needed. */
+/* 
+ * Create an HLL object. We always create the HLL using sparse encoding.
+ * This will be upgraded to the dense representation as needed. 
+ */
 robj *createHLLObject(void) {
     robj *o;
     struct hllhdr *hdr;
@@ -1178,9 +1180,11 @@ robj *createHLLObject(void) {
     return o;
 }
 
-/* Check if the object is a String with a valid HLL representation.
+/* 
+ * Check if the object is a String with a valid HLL representation.
  * Return C_OK if this is true, otherwise reply to the client
- * with an error and return C_ERR. */
+ * with an error and return C_ERR. 
+ */
 int isHLLObjectOrReply(client *c, robj *o) {
     struct hllhdr *hdr;
 
