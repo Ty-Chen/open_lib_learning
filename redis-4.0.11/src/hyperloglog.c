@@ -1180,7 +1180,7 @@ robj *createHLLObject(void) {
     return o;
 }
 
-/* 
+/* 检测hll
  * Check if the object is a String with a valid HLL representation.
  * Return C_OK if this is true, otherwise reply to the client
  * with an error and return C_ERR. 
