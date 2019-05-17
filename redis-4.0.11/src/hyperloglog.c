@@ -1180,7 +1180,7 @@ robj *createHLLObject(void) {
     return o;
 }
 
-/* 检测hll
+/* 检测对象是否是合法hll
  * Check if the object is a String with a valid HLL representation.
  * Return C_OK if this is true, otherwise reply to the client
  * with an error and return C_ERR. 
@@ -1216,7 +1216,9 @@ invalid:
     return C_ERR;
 }
 
-/* PFADD var ele ele ele ... ele => :0 or :1 */
+/* 添加元素
+ * PFADD var ele ele ele ... ele => :0 or :1 
+ */
 void pfaddCommand(client *c) {
     robj *o = lookupKeyWrite(c->db,c->argv[1]);
     struct hllhdr *hdr;
@@ -1256,7 +1258,9 @@ void pfaddCommand(client *c) {
     addReply(c, updated ? shared.cone : shared.czero);
 }
 
-/* PFCOUNT var -> approximated cardinality of set. */
+/* 输出元素数
+ * PFCOUNT var -> approximated cardinality of set. 
+ */
 void pfcountCommand(client *c) {
     robj *o;
     struct hllhdr *hdr;
