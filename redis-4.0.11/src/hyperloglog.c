@@ -1350,7 +1350,9 @@ void pfcountCommand(client *c) {
     }
 }
 
-/* PFMERGE dest src1 src2 src3 ... srcN => OK */
+/* 
+ * PFMERGE dest src1 src2 src3 ... srcN => OK 
+ */
 void pfmergeCommand(client *c) {
     uint8_t max[HLL_REGISTERS];
     struct hllhdr *hdr;
