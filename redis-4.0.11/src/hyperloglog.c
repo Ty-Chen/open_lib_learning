@@ -1350,7 +1350,7 @@ void pfcountCommand(client *c) {
     }
 }
 
-/* 
+/* 将多个值存在一起
  * PFMERGE dest src1 src2 src3 ... srcN => OK 
  */
 void pfmergeCommand(client *c) {
