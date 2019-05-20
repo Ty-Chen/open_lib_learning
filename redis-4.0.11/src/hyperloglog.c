@@ -1430,7 +1430,8 @@ void pfmergeCommand(client *c) {
 
 /* PFSELFTEST
  * This command performs a self-test of the HLL registers implementation.
- * Something that is not easy to test from within the outside. */
+ * Something that is not easy to test from within the outside. 
+ */
 #define HLL_TEST_CYCLES 1000
 void pfselftestCommand(client *c) {
     unsigned int j, i;
