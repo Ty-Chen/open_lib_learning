@@ -1443,7 +1443,8 @@ void pfselftestCommand(client *c) {
     /* Test 1: access registers.
      * The test is conceived to test that the different counters of our data
      * structure are accessible and that setting their values both result in
-     * the correct value to be retained and not affect adjacent values. */
+     * the correct value to be retained and not affect adjacent values. 
+     */
     for (j = 0; j < HLL_TEST_CYCLES; j++) {
         /* Set the HLL counters and an array of unsigned byes of the
          * same size to the same set of random values. */
