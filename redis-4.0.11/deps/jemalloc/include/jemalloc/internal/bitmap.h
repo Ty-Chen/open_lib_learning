@@ -19,8 +19,7 @@ typedef unsigned long bitmap_t;
 #define	BITMAP_BITS2GROUPS(nbits)					\
     ((nbits + BITMAP_GROUP_NBITS_MASK) >> LG_BITMAP_GROUP_NBITS)
 
-/*
- * Number of groups required at a particular level for a given number of bits.
+/* Number of groups required at a particular level for a given number of bits.
  */
 #define	BITMAP_GROUPS_L0(nbits)						\
     BITMAP_BITS2GROUPS(nbits)
@@ -32,8 +31,7 @@ typedef unsigned long bitmap_t;
     BITMAP_BITS2GROUPS(BITMAP_BITS2GROUPS(BITMAP_BITS2GROUPS(		\
 	BITMAP_BITS2GROUPS((nbits)))))
 
-/*
- * Assuming the number of levels, number of groups required for a given number
+/* Assuming the number of levels, number of groups required for a given number
  * of bits.
  */
 #define	BITMAP_GROUPS_1_LEVEL(nbits)					\
