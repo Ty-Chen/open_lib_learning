@@ -58,7 +58,8 @@ typedef struct quicklistNode {
     unsigned int extra : 10; /* more bits to steal for future usage */
 } quicklistNode;
 
-/* quicklistLZF is a 4+N byte struct holding 'sz' followed by 'compressed'.
+/* 采用lzf压缩的数据存储结构体
+ * quicklistLZF is a 4+N byte struct holding 'sz' followed by 'compressed'.
  * 'sz' is byte length of 'compressed' field.
  * 'compressed' is LZF data with total (compressed) length 'sz'
  * NOTE: uncompressed length is stored in quicklistNode->sz.
@@ -69,7 +70,7 @@ typedef struct quicklistLZF {
     char compressed[];
 } quicklistLZF;
 
-/* 快速链表
+/* 快速链表（为什么用户空间没有放在末尾？）
  * quicklist is a 40 byte struct (on 64-bit systems) describing a quicklist.
  * 'count' is the number of total entries.
  * 'len' is the number of quicklist nodes.
@@ -85,7 +86,8 @@ typedef struct quicklist {
     int fill : 16;              /* fill factor for individual nodes */
     unsigned int compress : 16; /* depth of end nodes not to compress;0=off */
 } quicklist;
-
+
+/* 快速链表迭代器，包括链表指针，当前节点，偏移量，方向，当前quicklist节点中迭代的ziplist*/
 typedef struct quicklistIter {
     const quicklist *quicklist;
     quicklistNode *current;
@@ -94,6 +96,7 @@ typedef struct quicklistIter {
     int direction;
 } quicklistIter;
 
+/* 快速链表入口，便于插入和遍历 */
 typedef struct quicklistEntry {
     const quicklist *quicklist;
     quicklistNode *node;
