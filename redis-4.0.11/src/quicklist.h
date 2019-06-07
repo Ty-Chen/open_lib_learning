@@ -35,7 +35,7 @@
  * Node, quicklist, and Iterator are the only data structures used currently. 
  */
 
-/* 快速链表节点：32字节
+/* 快速链表节点：32字节，zl指向压缩链表
  * quicklistNode is a 32 byte struct describing a ziplist for a quicklist.
  * We use bit fields keep the quicklistNode at 32 bytes.
  * count: 16 bits, max 65536 (max zl bytes is 65k, so max count actually < 32k).
@@ -70,7 +70,7 @@ typedef struct quicklistLZF {
     char compressed[];
 } quicklistLZF;
 
-/* 快速链表（为什么用户空间没有放在末尾？）
+/* 快速链表
  * quicklist is a 40 byte struct (on 64-bit systems) describing a quicklist.
  * 'count' is the number of total entries.
  * 'len' is the number of quicklist nodes.
