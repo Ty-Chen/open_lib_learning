@@ -55,7 +55,7 @@
  *     analysis of a near-optimal cardinality estimation algorithm.
  *
  * Redis uses two representations:
- * 密集存储和稀疏存储
+ * redis使用密集存储和稀疏存储
  * 1) A "dense" representation where every entry is represented by
  *    a 6-bit integer.
  * 2) A "sparse" representation using run length compression suitable
