@@ -65,7 +65,7 @@
  *
  * HLL header
  * ===
- *
+ * 头部结构
  * Both the dense and sparse representation have a 16 byte header as follows:
  *
  * +------+---+-----+----------+
