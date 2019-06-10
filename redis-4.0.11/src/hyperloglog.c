@@ -65,6 +65,7 @@
  *
  * HLL header
  * ===
+ *
  * 头部结构
  * Both the dense and sparse representation have a 16 byte header as follows:
  *
@@ -215,6 +216,7 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
 /* =========================== Low level bit macros ========================= */
 
 /* Macros to access the dense representation.
+ *
  * 为了计算速度采用了宏，因为仅用6位存储因此需要考虑不在一个字节的偏移问题
  * We need to get and set 6 bit counters in an array of 8 bit bytes.
  * We use macros to make sure the code is inlined since speed is critical
