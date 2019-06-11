@@ -399,7 +399,8 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
 /* MurmurHash2哈希算法
  * Our hash function is MurmurHash2, 64 bit version.
  * It was modified for Redis in order to provide the same result in
- * big and little endian archs (endian neutral). */
+ * big and little endian archs (endian neutral). 
+ */
 uint64_t MurmurHash64A (const void * key, int len, unsigned int seed) {
     const uint64_t m = 0xc6a4a7935bd1e995;
     const int r = 47;
