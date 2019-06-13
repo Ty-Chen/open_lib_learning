@@ -89,6 +89,7 @@
  *
  * Dense representation
  * ===
+ *
  * 密集存储：6位存储方式
  * The dense representation used by Redis is the following:
  *
