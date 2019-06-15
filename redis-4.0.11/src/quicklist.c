@@ -55,7 +55,8 @@ static const size_t optimization_level[] = {4096, 8192, 16384, 32768, 65536};
 
 /* Minimum size reduction in bytes to store compressed quicklistNode data.
  * This also prevents us from storing compression if the compression
- * resulted in a larger size than the original data. */
+ * resulted in a larger size than the original data. 
+ */
 #define MIN_COMPRESS_IMPROVE 8
 
 /* If not verbose testing, remove all debug printing. */
