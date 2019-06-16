@@ -104,9 +104,13 @@
  * ===
  *
  * 使用ZERO,XZERO和VAL来表示稀疏存储
- * ZERO和VAL长度为1，XZERO长度为2
+ * ZERO和VAL长度为1字节，XZERO长度为2字节
  * ZERO和XZERO分别表示连续64个以内和连续16384个以内的连续的0 
- * VAL表示连续32个以内的1，超过32个则改用密集存储
+ * VAL表示连续几个以内的值，值超过32则改用密集存储
+ *
+ * ZERO 格式为 00xxxxxx，x有6位可以表示64以内的数字
+ * XZERO格式为 01xxxxxx yyyyyyyy。x为高位y为低位，最多表示连续16384个0
+ * VAL  格式为 1vvvvvxx，v表示值，x表示有几个
  *
  * The sparse representation encodes registers using a run length
  * encoding composed of three opcodes, two using one byte, and one using
