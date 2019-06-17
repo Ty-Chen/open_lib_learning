@@ -110,7 +110,7 @@
  *
  * ZERO 格式为 00xxxxxx，x有6位可以表示64以内的数字
  * XZERO格式为 01xxxxxx yyyyyyyy。x为高位y为低位，最多表示连续16384个0
- * VAL  格式为 1vvvvvxx，v表示值，x表示有几个
+ * VAL  格式为 1vvvvvxx，v表示值，x表示有几个相同值，最多只能4个
  *
  * The sparse representation encodes registers using a run length
  * encoding composed of three opcodes, two using one byte, and one using
