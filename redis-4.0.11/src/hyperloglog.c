@@ -346,7 +346,7 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
  * term, so the byte exists, and we can skip the conditional (or the need
  * to allocate 1 byte more explicitly). */
 
-/* 在位置regnum存入目标值p
+/* 获取寄存器的值：获取regnum位置存储的值
  * Store the value of the register at position 'regnum' into variable 'target'.
  * 'p' is an array of unsigned bytes. 
  */
@@ -360,8 +360,10 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
     target = ((b0 >> _fb) | (b1 << _fb8)) & HLL_REGISTER_MAX; \
 } while(0)
 
-/* Set the value of the register at position 'regnum' to 'val'.
- * 'p' is an array of unsigned bytes. */
+/* 设置寄存器的值：将regnum位置存为val
+ * Set the value of the register at position 'regnum' to 'val'.
+ * 'p' is an array of unsigned bytes. 
+ */
 #define HLL_DENSE_SET_REGISTER(p,regnum,val) do { \
     uint8_t *_p = (uint8_t*) p; \
     unsigned long _byte = regnum*HLL_BITS/8; \
