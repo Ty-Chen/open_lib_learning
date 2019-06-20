@@ -344,7 +344,8 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
 /* Note: if we access the last counter, we will also access the b+1 byte
  * that is out of the array, but sds strings always have an implicit null
  * term, so the byte exists, and we can skip the conditional (or the need
- * to allocate 1 byte more explicitly). */
+ * to allocate 1 byte more explicitly).
+ */
 
 /* 获取寄存器的值：获取regnum位置存储的值
  * Store the value of the register at position 'regnum' into variable 'target'.
@@ -377,7 +378,8 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
 } while(0)
 
 /* Macros to access the sparse representation.
- * The macros parameter is expected to be an uint8_t pointer. */
+ * The macros parameter is expected to be an uint8_t pointer. 
+ */
 #define HLL_SPARSE_XZERO_BIT 0x40 /* 01xxxxxx */
 #define HLL_SPARSE_VAL_BIT 0x80 /* 1vvvvvxx */
 #define HLL_SPARSE_IS_ZERO(p) (((*(p)) & 0xc0) == 0) /* 00xxxxxx */
@@ -405,7 +407,8 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
 
 /* ========================= HyperLogLog algorithm  ========================= */
 
-/* MurmurHash2哈希算法
+/* MurmurHash2
+ * 哈希算法
  * Our hash function is MurmurHash2, 64 bit version.
  * It was modified for Redis in order to provide the same result in
  * big and little endian archs (endian neutral). 
