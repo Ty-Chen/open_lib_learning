@@ -468,7 +468,8 @@ uint64_t MurmurHash64A (const void * key, int len, unsigned int seed) {
 /* String类型的元素加入，哈希之后统计连续0个数
  * Given a string element to add to the HyperLogLog, returns the length
  * of the pattern 000..1 of the element hash. As a side effect 'regp' is
- * set to the register index this element hashes to. */
+ * set to the register index this element hashes to. 
+ */
 int hllPatLen(unsigned char *ele, size_t elesize, long *regp) {
     uint64_t hash, bit, index;
     int count;
@@ -499,6 +500,7 @@ int hllPatLen(unsigned char *ele, size_t elesize, long *regp) {
 
 /* ================== Dense representation implementation  ================== */
 //密集存储实现
+
 /* 重新设置桶类计数
  * Low level function to set the dense HLL register at 'index' to the
  * specified value if the current value is smaller than 'count'.
@@ -509,7 +511,8 @@ int hllPatLen(unsigned char *ele, size_t elesize, long *regp) {
  *
  * The function always succeed, however if as a result of the operation
  * the approximated cardinality changed, 1 is returned. Otherwise 0
- * is returned. */
+ * is returned. 
+ */
 int hllDenseSet(uint8_t *registers, long index, uint8_t count) {
     uint8_t oldcount;
 
