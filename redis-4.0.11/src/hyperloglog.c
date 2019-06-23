@@ -229,6 +229,7 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
  * HLLCOUNT where we need to access all the registers at once.
  * For the same reason we also want to avoid conditionals in this code path.
  *
+ * 这里由于存储格式为LSB到MSB，因此直观看起来仿佛是分割开的，起始是连续的6个1， 6个2，诸如此类
  * +--------+--------+--------+------//
  * |11000000|22221111|33333322|55444444
  * +--------+--------+--------+------//
@@ -611,7 +612,8 @@ double hllDenseSum(uint8_t *registers, double *PE, int *ezp) {
  * the input representation is freed as a side effect.
  *
  * The function returns C_OK if the sparse representation was valid,
- * otherwise C_ERR is returned if the representation was corrupted. */
+ * otherwise C_ERR is returned if the representation was corrupted. 
+ */
 int hllSparseToDense(robj *o) {
     sds sparse = o->ptr, dense;
     struct hllhdr *hdr, *oldhdr = (struct hllhdr*)sparse;
