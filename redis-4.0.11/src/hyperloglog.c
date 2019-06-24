@@ -313,7 +313,7 @@ static char *invalid_hll_err = "-INVALIDOBJ Corrupted HLL object detected\r\n";
  * To create a AND-mask to clear the bits about this position, we just
  * initialize the mask with the value 63, left shift it of "fs" bits,
  * and finally invert the result.
- *
+ * 掩码移位+反转
  *   +--------+
  *   |00111111|  <- "mask" starts at 63
  *   |11000000|  <- "mask" after left shift of "ls" bits.
