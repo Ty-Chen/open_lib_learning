@@ -485,7 +485,8 @@ int hllPatLen(unsigned char *ele, size_t elesize, long *regp) {
      * at the first position, that is a count of 1.
      *
      * This may sound like inefficient, but actually in the average case
-     * there are high probabilities to find a 1 after a few iterations. */
+     * there are high probabilities to find a 1 after a few iterations. 
+     */
     hash = MurmurHash64A(ele,elesize,0xadc83b19ULL);
     index = hash & HLL_P_MASK; /* Register index. */
     hash |= ((uint64_t)1<<63); /* Make sure the loop terminates. */
@@ -532,7 +533,8 @@ int hllDenseSet(uint8_t *registers, long index, uint8_t count) {
  * the element belongs to is incremented if needed.
  *
  * This is just a wrapper to hllDenseSet(), performing the hashing of the
- * element in order to retrieve the index and zero-run count. */
+ * element in order to retrieve the index and zero-run count. 
+ */
 int hllDenseAdd(uint8_t *registers, unsigned char *ele, size_t elesize) {
     long index;
     uint8_t count = hllPatLen(ele,elesize,&index);
@@ -547,7 +549,8 @@ int hllDenseAdd(uint8_t *registers, unsigned char *ele, size_t elesize) {
  * Compute SUM(2^-reg) in the dense representation.
  * PE is an array with a pre-computer table of values 2^-reg indexed by reg.
  * As a side effect the integer pointed by 'ezp' is set to the number
- * of zero registers. */
+ * of zero registers.
+ */
 double hllDenseSum(uint8_t *registers, double *PE, int *ezp) {
     double E = 0;
     int j, ez = 0;
