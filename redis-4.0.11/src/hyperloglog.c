@@ -623,7 +623,9 @@ int hllSparseToDense(robj *o) {
     int idx = 0, runlen, regval;
     uint8_t *p = (uint8_t*)sparse, *end = p+sdslen(sparse);
 
-    /* If the representation is already the right one return ASAP. */
+    /* 已经是密集存储则直接返回OK
+     * If the representation is already the right one return ASAP. 
+     */
     hdr = (struct hllhdr*) sparse;
     if (hdr->encoding == HLL_DENSE) return C_OK;
 
