@@ -810,14 +810,18 @@ int hllSparseSet(robj *o, long index, uint8_t count) {
         }
     }
 
-    /* C) Another trivial to handle case is a ZERO opcode with a len of 1.
-     * We can just replace it with a VAL opcode with our value and len of 1. */
+    /* 对于ZERO直接转化为VAL即可
+     * C) Another trivial to handle case is a ZERO opcode with a len of 1.
+     * We can just replace it with a VAL opcode with our value and len of 1. 
+     */
     if (is_zero && runlen == 1) {
         HLL_SPARSE_VAL_SET(p,count,1);
         goto updated;
     }
 
-    /* D) General case.
+    /* 复杂情况：几种不同格式混杂时需要分割后进行处理
+     *  
+     * D) General case.
      *
      * The other cases are more complex: our register requires to be updated
      * and is either currently represented by a VAL opcode with len > 1,
