@@ -9,6 +9,7 @@
  * ----------------------------------------------------------------------------
  *
  * ZIPLIST OVERALL LAYOUT
+ *
  * 压缩列表概要
  * ziplist是一个经过特殊编码的双向链表，
  * 它的设计目标就是为了提高存储效率。
@@ -25,25 +26,30 @@
  *
  * NOTE: all fields are stored in little endian, if not specified otherwise.
  *
+ * zlbytes:记录压缩列表占据的字节数，包括自身的4个字节，用于内存重分配
  * <uint32_t zlbytes> is an unsigned integer to hold the number of bytes that
  * the ziplist occupies, including the four bytes of the zlbytes field itself.
  * This value needs to be stored to be able to resize the entire structure
  * without the need to traverse it first.
  *
+ * zltail：尾节点的偏移量，利于实现尾部pop操作
  * <uint32_t zltail> is the offset to the last entry in the list. This allows
  * a pop operation on the far side of the list without the need for full
  * traversal.
  *
+ * zllen：节点数
  * <uint16_t zllen> is the number of entries. When there are more than
  * 2^16-2 entires, this value is set to 2^16-1 and we need to traverse the
  * entire list to know how many items it holds.
  *
+ * zlend：记录压缩列表的尾部，设置为特殊值0xff
  * <uint8_t zlend> is a special entry representing the end of the ziplist.
  * Is encoded as a single byte equal to 255. No other normal entry starts
  * with a byte set to the value of 255.
  *
  * ZIPLIST ENTRIES
  * ===============
+ * 压缩列表节点
  *
  * Every entry in the ziplist is prefixed by metadata that contains two pieces
  * of information. First, the length of the previous entry is stored to be
