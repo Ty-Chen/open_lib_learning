@@ -52,7 +52,7 @@
  * 压缩列表节点
  * prevlen：存储上一个节点的长度，用以由后往前回到上一个节点
  * encoding：节点的content属性所保存数据的类型以及长度
- * entry-data：数据
+ * entry-data：节点数据
  *
  * Every entry in the ziplist is prefixed by metadata that contains two pieces
  * of information. First, the length of the previous entry is stored to be
