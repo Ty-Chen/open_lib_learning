@@ -64,12 +64,14 @@
  *
  * <prevlen> <encoding> <entry-data>
  *
+ * 有时也可以直接用encoding代表节点自身，入较小的整形数据，这种情况下可以省略entry-data
  * Sometimes the encoding represents the entry itself, like for small integers
  * as we'll see later. In such a case the <entry-data> part is missing, and we
  * could have just:
  *
  * <prevlen> <encoding>
  *
+ * prevlen的长度小于254则用一个字节表示，否则用5个字节，起始字节为特殊标识FE
  * The length of the previous entry, <prevlen>, is encoded in the following way:
  * If this length is smaller than 254 bytes, it will only consume a single
  * byte representing the length as an unsinged 8 bit integer. When the length
