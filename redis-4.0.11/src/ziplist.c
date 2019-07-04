@@ -72,6 +72,7 @@
  * <prevlen> <encoding>
  *
  * prevlen的长度小于254则用一个字节表示，否则用5个字节，起始字节为特殊标识FE
+ *
  * The length of the previous entry, <prevlen>, is encoded in the following way:
  * If this length is smaller than 254 bytes, it will only consume a single
  * byte representing the length as an unsinged 8 bit integer. When the length
@@ -87,6 +88,9 @@
  * the following encoding is used:
  *
  * 0xFE <4 bytes unsigned little endian prevlen> <encoding> <entry>
+ *
+ * encoding域是根据内容来进行分类：
+ * (1)string类型
  *
  * The encoding field of the entry depends on the content of the
  * entry. When the entry is a string, the first 2 bits of the encoding first
