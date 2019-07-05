@@ -90,7 +90,8 @@
  * 0xFE <4 bytes unsigned little endian prevlen> <encoding> <entry>
  *
  * encoding域是根据内容来进行分类：
- * (1)string类型
+ * (1)string类型，第一个字节前2个位表示长度存储类型，后面跟上长度
+ * (2)int类型，开头2位置为11
  *
  * The encoding field of the entry depends on the content of the
  * entry. When the entry is a string, the first 2 bits of the encoding first
