@@ -93,6 +93,7 @@
  * (1)string类型，第一个字节前2个位表示长度存储类型，后面跟上长度。
  *    根据长度的不同00表示1字节长string，最多表示64字节长
  *	  01表示2字节string，最多表示16384字节
+ *	  10表示5字节string，表示大于16384字节的string
  * (2)int类型，开头2位置为11
  *
  * The encoding field of the entry depends on the content of the
