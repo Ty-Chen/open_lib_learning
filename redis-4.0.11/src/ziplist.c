@@ -92,9 +92,12 @@
  * encoding域是根据内容来进行分类：
  * (1)string类型，第一个字节前2个位表示长度存储类型，后面跟上长度。
  *    根据长度的不同00表示1字节长string，最多表示64字节长
- *	  01表示2字节string，最多表示16384字节
+ *	  01表示2字节string，最多表示16384字节的string
  *	  10表示5字节string，表示大于16384字节的string
- * (2)int类型，开头2位置为11
+ * (2)int类型
+ * 	  |11000000|，3字节表示int16_t
+ *	  |11010000|，5字节表示int32_t
+ *	  |11100000|，9字节表示int64_t
  *
  * The encoding field of the entry depends on the content of the
  * entry. When the entry is a string, the first 2 bits of the encoding first
