@@ -320,7 +320,7 @@
         ZIPLIST_LENGTH(zl) = intrev16ifbe(intrev16ifbe(ZIPLIST_LENGTH(zl)) + incr); \
 }
 
-/* 接受压缩列表信息的结构体
+/* 接受压缩链表信息的结构体（压缩链表节点）
  * We use this function to receive information about a ziplist entry.
  * Note that this is not how the data is actually encoded, is just what we
  * get filled by a function in order to operate more easily.
@@ -345,7 +345,7 @@ typedef struct zlentry {
                                     is, this points to prev-entry-len field. */
 } zlentry;
 
-/* 初始化结构体zlentry */
+/* 初始化压缩链表节点zlentry */
 #define ZIPLIST_ENTRY_ZERO(zle) { \
     (zle)->prevrawlensize = (zle)->prevrawlen = 0; \
     (zle)->lensize = (zle)->len = (zle)->headersize = 0; \
@@ -362,7 +362,7 @@ typedef struct zlentry {
     if ((encoding) < ZIP_STR_MASK) (encoding) &= ZIP_STR_MASK; \
 } while(0)
 
-/* 根据encoding返回压缩列表的整型大小
+/* 根据encoding返回压缩链表的整型大小
  * Return bytes needed to store integer encoded by 'encoding'. 
  */
 unsigned int zipIntSize(unsigned char encoding) {
