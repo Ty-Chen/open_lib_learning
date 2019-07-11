@@ -398,8 +398,10 @@ unsigned int zipStoreEntryEncoding(unsigned char *p, unsigned char encoding, uns
     unsigned char len = 1, buf[5];
 
     if (ZIP_IS_STR(encoding)) {
-        /* Although encoding is given it may not be set for strings,
-         * so we determine it here using the raw length. */
+        /* 根据rawlen判断类型
+         * Although encoding is given it may not be set for strings,
+         * so we determine it here using the raw length. 
+         */
         if (rawlen <= 0x3f) {
             if (!p) return len;
             buf[0] = ZIP_STR_06B | rawlen;
@@ -428,7 +430,7 @@ unsigned int zipStoreEntryEncoding(unsigned char *p, unsigned char encoding, uns
     return len;
 }
 
-/* 对encooding进行解码
+/* 对encooding进行解码，返回ptr编码的长度/字节数
  * Decode the entry encoding type and data length (string length for strings,
  * number of bytes used for the integer for integer entries) encoded in 'ptr'.
  * The 'encoding' variable will hold the entry encoding, the 'lensize'
