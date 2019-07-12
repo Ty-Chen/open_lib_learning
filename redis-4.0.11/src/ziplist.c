@@ -494,8 +494,10 @@ unsigned int zipStorePrevEntryLength(unsigned char *p, unsigned int len)
     }
 }
 
-/* Return the number of bytes used to encode the length of the previous
- * entry. The length is returned by setting the var 'prevlensize'. */
+/* 返回上一节点编码的字节数
+ * Return the number of bytes used to encode the length of the previous
+ * entry. The length is returned by setting the var 'prevlensize'. 
+ */
 #define ZIP_DECODE_PREVLENSIZE(ptr, prevlensize) do {                          \
     if ((ptr)[0] < ZIP_BIG_PREVLEN) {                                          \
         (prevlensize) = 1;                                                     \
