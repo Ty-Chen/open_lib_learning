@@ -20,13 +20,14 @@
  *
  * ======================
  *
+ * 压缩链表主要结构：
  * The general layout of the ziplist is as follows:
  *
  * <zlbytes> <zltail> <zllen> <entry> <entry> ... <entry> <zlend>
  *
  * NOTE: all fields are stored in little endian, if not specified otherwise.
  *
- * zlbytes:记录压缩列表占据的字节数，包括自身的4个字节，用于内存重分配
+ * zlbytes:记录压缩链表占据的字节数，包括自身的4个字节，用于内存重分配
  * <uint32_t zlbytes> is an unsigned integer to hold the number of bytes that
  * the ziplist occupies, including the four bytes of the zlbytes field itself.
  * This value needs to be stored to be able to resize the entire structure
@@ -37,12 +38,12 @@
  * a pop operation on the far side of the list without the need for full
  * traversal.
  *
- * zllen：节点数
+ * zllen：节点数，最多2^16-2，若超过范围则必须转换为多个压缩链表
  * <uint16_t zllen> is the number of entries. When there are more than
  * 2^16-2 entires, this value is set to 2^16-1 and we need to traverse the
  * entire list to know how many items it holds.
  *
- * zlend：记录压缩列表的尾部，设置为特殊值0xff
+ * zlend：记录压缩链表的尾部，设置为特殊值0xff
  * <uint8_t zlend> is a special entry representing the end of the ziplist.
  * Is encoded as a single byte equal to 255. No other normal entry starts
  * with a byte set to the value of 255.
@@ -64,7 +65,7 @@
  *
  * <prevlen> <encoding> <entry-data>
  *
- * 有时也可以直接用encoding代表节点自身，入较小的整形数据，这种情况下可以省略entry-data
+ * 有时也可以直接用encoding代表节点自身，如较小的整形数据，这种情况下可以省略entry-data
  * Sometimes the encoding represents the entry itself, like for small integers
  * as we'll see later. In such a case the <entry-data> part is missing, and we
  * could have just:
