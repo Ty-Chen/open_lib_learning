@@ -525,7 +525,8 @@ unsigned int zipStorePrevEntryLength(unsigned char *p, unsigned int len)
     }                                                                          \
 } while(0);
 
-/* Given a pointer 'p' to the prevlen info that prefixes an entry, this
+/* 根据指向prevlen的指针p获取prevlensize和len的差值
+ * Given a pointer 'p' to the prevlen info that prefixes an entry, this
  * function returns the difference in number of bytes needed to encode
  * the prevlen if the previous entry changes of size.
  *
@@ -547,7 +548,9 @@ int zipPrevLenByteDiff(unsigned char *p, unsigned int len) {
     return zipStorePrevEntryLength(NULL, len) - prevlensize;
 }
 
-/* Return the total number of bytes used by the entry pointed to by 'p'. */
+/* 返回节点总字节数
+ * Return the total number of bytes used by the entry pointed to by 'p'. 
+ */
 unsigned int zipRawEntryLength(unsigned char *p) {
     unsigned int prevlensize, encoding, lensize, len;
     ZIP_DECODE_PREVLENSIZE(p, prevlensize);
