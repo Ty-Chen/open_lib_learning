@@ -507,7 +507,8 @@ unsigned int zipStorePrevEntryLength(unsigned char *p, unsigned int len)
     }                                                                          \
 } while(0);
 
-/* Return the length of the previous element, and the number of bytes that
+/* 返回上一个元素的长度prevlen和编码的字节数prevlensize
+ * Return the length of the previous element, and the number of bytes that
  * are used in order to encode the previous element length.
  * 'ptr' must point to the prevlen prefix of an entry (that encodes the
  * length of the previos entry in order to navigate the elements backward).
