@@ -1178,7 +1178,8 @@ unsigned char *ziplistPrev(unsigned char *zl, unsigned char *p) {
     }
 }
 
-/* Get entry pointed to by 'p' and store in either '*sstr' or 'sval' depending
+/* 获取压缩列表的节点，存在sstr或sval中。
+ * Get entry pointed to by 'p' and store in either '*sstr' or 'sval' depending
  * on the encoding of the entry. '*sstr' is always set to NULL to be able
  * to find out whether the string pointer or the integer value was set.
  * Return 0 if 'p' points to the end of the ziplist, 1 otherwise. */
@@ -1232,7 +1233,8 @@ unsigned char *ziplistDeleteRange(unsigned char *zl, int index, unsigned int num
     return (p == NULL) ? zl : __ziplistDelete(zl,p,num);
 }
 
-/* Compare entry pointer to by 'p' with 'sstr' of length 'slen'. */
+/* 比较压缩列表节点P和sstr
+ * Compare entry pointer to by 'p' with 'sstr' of length 'slen'. */
 /* Return 1 if equal. */
 unsigned int ziplistCompare(unsigned char *p, unsigned char *sstr, unsigned int slen) {
     zlentry entry;
