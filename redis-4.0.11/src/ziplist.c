@@ -1409,6 +1409,7 @@ void ziplistRepr(unsigned char *zl) {
     printf("{end}\n\n");
 }
 
+// 测试代码
 #ifdef REDIS_TEST
 #include <sys/time.h>
 #include "adlist.h"
