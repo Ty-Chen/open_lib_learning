@@ -33,9 +33,20 @@
 
 /* 当前主要使用的数据结构：节点、快速链表，迭代器
  * Node, quicklist, and Iterator are the only data structures used currently. 
+ * quicklist的结构为什么这样设计呢？总结起来，大概又是一个空间和时间的折中：
+ * 双向链表便于在表的两端进行push和pop操作，但是它的内存开销比较大。
+ * 首先，它在每个节点上除了要保存数据之外，还要额外保存两个指针；
+ * 其次，双向链表的各个节点是单独的内存块，地址不连续，节点多了容易产生内存碎片。
+ * ziplist由于是一整块连续内存，所以存储效率很高。但是，它不利于修改操作，
+ * 每次数据变动都会引发一次内存的realloc。特别是当ziplist长度很长的时候，
+ * 一次realloc可能会导致大批量的数据拷贝，进一步降低性能
  */
 
-/* 快速链表节点：32字节，zl指向压缩链表
+/* 快速链表节点：32字节，底层其实是压缩链表
+ * count：压缩链表中的节点数
+ * encoding:编码类型ziplist或者lzf
+ * container：是否使用了ziplist
+ * recompress：是否开启压缩/解压
  * quicklistNode is a 32 byte struct describing a ziplist for a quicklist.
  * We use bit fields keep the quicklistNode at 32 bytes.
  * count: 16 bits, max 65536 (max zl bytes is 65k, so max count actually < 32k).
