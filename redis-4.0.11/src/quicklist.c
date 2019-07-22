@@ -43,7 +43,9 @@
 #define REDIS_STATIC static
 #endif
 
-/* Optimization levels for size-based filling */
+/* 优化等级
+ * Optimization levels for size-based filling 
+ */
 static const size_t optimization_level[] = {4096, 8192, 16384, 32768, 65536};
 
 /* Maximum size in bytes of any multi-element ziplist.
