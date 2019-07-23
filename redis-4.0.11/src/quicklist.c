@@ -48,8 +48,10 @@
  */
 static const size_t optimization_level[] = {4096, 8192, 16384, 32768, 65536};
 
-/* Maximum size in bytes of any multi-element ziplist.
- * Larger values will live in their own isolated ziplists. */
+/* 压缩链表最大字节数
+ * Maximum size in bytes of any multi-element ziplist.
+ * Larger values will live in their own isolated ziplists. 
+ */
 #define SIZE_SAFETY_LIMIT 8192
 
 /* Minimum ziplist size in bytes for attempting compression. */
