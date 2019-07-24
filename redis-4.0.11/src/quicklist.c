@@ -54,10 +54,13 @@ static const size_t optimization_level[] = {4096, 8192, 16384, 32768, 65536};
  */
 #define SIZE_SAFETY_LIMIT 8192
 
-/* Minimum ziplist size in bytes for attempting compression. */
+/* 压缩链表压缩后最小字节数
+ * Minimum ziplist size in bytes for attempting compression. 
+ */
 #define MIN_COMPRESS_BYTES 48
 
-/* Minimum size reduction in bytes to store compressed quicklistNode data.
+/* 最小压缩提升：意在防止出现压缩后反而占据跟多字节的情况出现
+ * Minimum size reduction in bytes to store compressed quicklistNode data.
  * This also prevents us from storing compression if the compression
  * resulted in a larger size than the original data. 
  */
@@ -94,8 +97,10 @@ static const size_t optimization_level[] = {4096, 8192, 16384, 32768, 65536};
 #define unlikely(x) (x)
 #endif
 
-/* Create a new quicklist.
- * Free with quicklistRelease(). */
+/* 创建压缩链表
+ * Create a new quicklist.
+ * Free with quicklistRelease(). 
+ */
 quicklist *quicklistCreate(void) {
     struct quicklist *quicklist;
 
