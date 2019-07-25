@@ -97,7 +97,7 @@ static const size_t optimization_level[] = {4096, 8192, 16384, 32768, 65536};
 #define unlikely(x) (x)
 #endif
 
-/* 创建压缩链表
+/* 创建压缩链表，全部赋初始值，指针为NLL
  * Create a new quicklist.
  * Free with quicklistRelease(). 
  */
