@@ -133,12 +133,15 @@ void quicklistSetFill(quicklist *quicklist, int fill) {
     quicklist->fill = fill;
 }
 
+/* 设置fill和compress值 */
 void quicklistSetOptions(quicklist *quicklist, int fill, int depth) {
     quicklistSetFill(quicklist, fill);
     quicklistSetCompressDepth(quicklist, depth);
 }
 
-/* Create a new quicklist with some default parameters. */
+/* 新建快速链表并根据fill和compress设置初始值
+ * Create a new quicklist with some default parameters. 
+ */
 quicklist *quicklistNew(int fill, int compress) {
     quicklist *quicklist = quicklistCreate();
     quicklistSetOptions(quicklist, fill, compress);
