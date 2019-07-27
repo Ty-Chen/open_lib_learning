@@ -114,6 +114,8 @@ quicklist *quicklistCreate(void) {
 }
 
 #define COMPRESS_MAX (1 << 16)
+
+/*设置compress值，即压缩程度*/
 void quicklistSetCompressDepth(quicklist *quicklist, int compress) {
     if (compress > COMPRESS_MAX) {
         compress = COMPRESS_MAX;
