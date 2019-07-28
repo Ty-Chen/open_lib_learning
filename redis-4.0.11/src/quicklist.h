@@ -92,10 +92,10 @@ typedef struct quicklistLZF {
 typedef struct quicklist {
     quicklistNode *head;
     quicklistNode *tail;
-    unsigned long count;        /* total count of all entries in all ziplists */
-    unsigned long len;          /* number of quicklistNodes */
+    unsigned long count;        /* 节点总数 total count of all entries in all ziplists */
+    unsigned long len;          /* 快速链表节点总数 number of quicklistNodes */
     int fill : 16;              /* fill factor for individual nodes */
-    unsigned int compress : 16; /* depth of end nodes not to compress;0=off */
+    unsigned int compress : 16; /* 不需要压缩的尾结点数 depth of end nodes not to compress;0=off */
 } quicklist;
 
 /* 快速链表迭代器，包括链表指针，当前节点，偏移量，方向，当前quicklist节点中迭代的ziplist*/
