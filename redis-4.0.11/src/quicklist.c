@@ -150,6 +150,7 @@ quicklist *quicklistNew(int fill, int compress) {
     return quicklist;
 }
 
+/* 创建快速链表节点 */
 REDIS_STATIC quicklistNode *quicklistCreateNode(void) {
     quicklistNode *node;
     node = zmalloc(sizeof(*node));
