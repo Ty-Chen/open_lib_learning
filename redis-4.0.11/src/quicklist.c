@@ -164,10 +164,14 @@ REDIS_STATIC quicklistNode *quicklistCreateNode(void) {
     return node;
 }
 
-/* Return cached quicklist count */
+/* 返回快速链表节点数
+ * Return cached quicklist count 
+ */
 unsigned long quicklistCount(const quicklist *ql) { return ql->count; }
 
-/* Free entire quicklist. */
+/* 释放快速链表
+ * Free entire quicklist. 
+ */
 void quicklistRelease(quicklist *quicklist) {
     unsigned long len;
     quicklistNode *current, *next;
@@ -190,7 +194,8 @@ void quicklistRelease(quicklist *quicklist) {
 
 /* Compress the ziplist in 'node' and update encoding details.
  * Returns 1 if ziplist compressed successfully.
- * Returns 0 if compression failed or if ziplist too small to compress. */
+ * Returns 0 if compression failed or if ziplist too small to compress. 
+ */
 REDIS_STATIC int __quicklistCompressNode(quicklistNode *node) {
 #ifdef REDIS_TEST
     node->attempted_compress = 1;
