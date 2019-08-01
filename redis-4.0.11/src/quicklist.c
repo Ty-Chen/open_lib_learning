@@ -181,9 +181,11 @@ void quicklistRelease(quicklist *quicklist) {
     while (len--) {
         next = current->next;
 
+		//释放压缩链表，压缩链表节点数递减
         zfree(current->zl);
         quicklist->count -= current->count;
 
+		// 释放当前节点，快速链表节点数减1
         zfree(current);
 
         quicklist->len--;
@@ -192,7 +194,8 @@ void quicklistRelease(quicklist *quicklist) {
     zfree(quicklist);
 }
 
-/* Compress the ziplist in 'node' and update encoding details.
+/* 对节点中的压缩链表进行压缩并更新编码状态
+ * Compress the ziplist in 'node' and update encoding details.
  * Returns 1 if ziplist compressed successfully.
  * Returns 0 if compression failed or if ziplist too small to compress. 
  */
@@ -201,13 +204,16 @@ REDIS_STATIC int __quicklistCompressNode(quicklistNode *node) {
     node->attempted_compress = 1;
 #endif
 
-    /* Don't bother compressing small values */
+    /* 节点较小则不压缩
+     * Don't bother compressing small values */
     if (node->sz < MIN_COMPRESS_BYTES)
         return 0;
 
     quicklistLZF *lzf = zmalloc(sizeof(*lzf) + node->sz);
 
-    /* Cancel if compression fails or doesn't compress small enough */
+    /* 压缩失败或压缩提升小则取消
+     * Cancel if compression fails or doesn't compress small enough 
+     */
     if (((lzf->sz = lzf_compress(node->zl, node->sz, lzf->compressed,
                                  node->sz)) == 0) ||
         lzf->sz + MIN_COMPRESS_IMPROVE >= node->sz) {
@@ -215,6 +221,8 @@ REDIS_STATIC int __quicklistCompressNode(quicklistNode *node) {
         zfree(lzf);
         return 0;
     }
+
+	//用lzf取代旧的zl
     lzf = zrealloc(lzf, sizeof(*lzf) + lzf->sz);
     zfree(node->zl);
     node->zl = (unsigned char *)lzf;
