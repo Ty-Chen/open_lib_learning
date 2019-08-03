@@ -249,15 +249,19 @@ REDIS_STATIC int __quicklistDecompressNode(quicklistNode *node) {
 #ifdef REDIS_TEST
     node->attempted_compress = 0;
 #endif
+
 	// decompressed存放解压后的节点数据
     void *decompressed = zmalloc(node->sz);
     quicklistLZF *lzf = (quicklistLZF *)node->zl;
+	
+	// 调用lzf解压API，失败则返回0
     if (lzf_decompress(lzf->compressed, lzf->sz, decompressed, node->sz) == 0) {
         /* Someone requested decompress, but we can't decompress.  Not good. */
         zfree(decompressed);
         return 0;
     }
-	//释放压缩数据
+	
+	//释放压缩数据，给节点的zl重新赋值为decompressed
     zfree(lzf);
     node->zl = decompressed;
     node->encoding = QUICKLIST_NODE_ENCODING_RAW;
