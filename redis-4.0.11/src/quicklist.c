@@ -268,7 +268,9 @@ REDIS_STATIC int __quicklistDecompressNode(quicklistNode *node) {
     return 1;
 }
 
-/* Decompress only compressed nodes. */
+/* 解压压缩的节点，调用__quicklistDecompressNode实现
+ * Decompress only compressed nodes. 
+ */
 #define quicklistDecompressNode(_node)                                         \
     do {                                                                       \
         if ((_node) && (_node)->encoding == QUICKLIST_NODE_ENCODING_LZF) {     \
