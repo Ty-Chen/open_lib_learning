@@ -278,7 +278,9 @@ REDIS_STATIC int __quicklistDecompressNode(quicklistNode *node) {
         }                                                                      \
     } while (0)
 
-/* Force node to not be immediately re-compresable */
+/* 解压之后给节点recompress赋值，使其不能立刻被在此压缩
+ * Force node to not be immediately re-compresable 
+ */
 #define quicklistDecompressNodeForUse(_node)                                   \
     do {                                                                       \
         if ((_node) && (_node)->encoding == QUICKLIST_NODE_ENCODING_LZF) {     \
