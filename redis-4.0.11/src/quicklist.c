@@ -289,9 +289,11 @@ REDIS_STATIC int __quicklistDecompressNode(quicklistNode *node) {
         }                                                                      \
     } while (0)
 
-/* Extract the raw LZF data from this quicklistNode.
+/* 从node中获取lzf数据，存在data中
+ * Extract the raw LZF data from this quicklistNode.
  * Pointer to LZF data is assigned to '*data'.
- * Return value is the length of compressed LZF data. */
+ * Return value is the length of compressed LZF data. 
+ */
 size_t quicklistGetLzf(const quicklistNode *node, void **data) {
     quicklistLZF *lzf = (quicklistLZF *)node->zl;
     *data = lzf->compressed;
@@ -300,14 +302,17 @@ size_t quicklistGetLzf(const quicklistNode *node, void **data) {
 
 #define quicklistAllowsCompression(_ql) ((_ql)->compress != 0)
 
-/* Force 'quicklist' to meet compression guidelines set by compress depth.
+/* 对快速链表强制压缩至设置的压缩深度 
+ * Force 'quicklist' to meet compression guidelines set by compress depth.
  * The only way to guarantee interior nodes get compressed is to iterate
  * to our "interior" compress depth then compress the next node we find.
  * If compress depth is larger than the entire list, we return immediately. */
 REDIS_STATIC void __quicklistCompress(const quicklist *quicklist,
                                       quicklistNode *node) {
-    /* If length is less than our compress depth (from both sides),
-     * we can't compress anything. */
+    /* 快速链表总长度小于压缩深度则没有压缩的空间，直接返回
+     * If length is less than our compress depth (from both sides),
+     * we can't compress anything. 
+     */
     if (!quicklistAllowsCompression(quicklist) ||
         quicklist->len < (unsigned int)(quicklist->compress * 2))
         return;
