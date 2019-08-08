@@ -362,7 +362,7 @@ REDIS_STATIC void __quicklistCompress(const quicklist *quicklist,
         if (forward == node || reverse == node)
             in_depth = 1;
 
-		//到达中间，循环结束
+		// 到达中间，循环结束
         if (forward == reverse)
             return;
 
