@@ -349,7 +349,8 @@ REDIS_STATIC void __quicklistCompress(const quicklist *quicklist,
     /* 首尾压缩深度内的节点不压缩，通过双向循环直至中间
      * Iterate until we reach compress depth for both sides of the list.a
      * Note: because we do length checks at the *top* of this function,
-     *       we can skip explicit null checks below. Everything exists. */
+     * we can skip explicit null checks below. Everything exists. 
+     */
     quicklistNode *forward = quicklist->head;
     quicklistNode *reverse = quicklist->tail;
     int depth = 0;
@@ -370,6 +371,7 @@ REDIS_STATIC void __quicklistCompress(const quicklist *quicklist,
         reverse = reverse->prev;
     }
 
+	// node如果不在收尾深度内则压缩
     if (!in_depth)
         quicklistCompressNode(node);
 
