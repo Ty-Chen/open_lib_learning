@@ -302,7 +302,7 @@ size_t quicklistGetLzf(const quicklistNode *node, void **data) {
 
 #define quicklistAllowsCompression(_ql) ((_ql)->compress != 0)
 
-/* 对快速链表强制压缩至设置的压缩深度：循环压缩各个节点 
+/* 按压缩规则压缩快速链表中的节点node 
  * Force 'quicklist' to meet compression guidelines set by compress depth.
  * The only way to guarantee interior nodes get compressed is to iterate
  * to our "interior" compress depth then compress the next node we find.
@@ -356,6 +356,7 @@ REDIS_STATIC void __quicklistCompress(const quicklist *quicklist,
     int depth = 0;
     int in_depth = 0;
 
+	// 深度之外的节点不压缩
     while (depth++ < quicklist->compress) {
         quicklistDecompressNode(forward);
         quicklistDecompressNode(reverse);
@@ -375,6 +376,7 @@ REDIS_STATIC void __quicklistCompress(const quicklist *quicklist,
     if (!in_depth)
         quicklistCompressNode(node);
 
+	// depth大于2的情况仅出现于forward, reverse刚好需要压缩
     if (depth > 2) {
         /* At this point, forward and reverse are one node beyond depth */
         quicklistCompressNode(forward);
