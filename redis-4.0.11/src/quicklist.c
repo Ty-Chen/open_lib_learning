@@ -384,6 +384,7 @@ REDIS_STATIC void __quicklistCompress(const quicklist *quicklist,
     }
 }
 
+// 压缩节点node，如果定义了重压缩则不需要检测直接压缩，否则要检测
 #define quicklistCompress(_ql, _node)                                          \
     do {                                                                       \
         if ((_node)->recompress)                                               \
@@ -392,21 +393,26 @@ REDIS_STATIC void __quicklistCompress(const quicklist *quicklist,
             __quicklistCompress((_ql), (_node));                               \
     } while (0)
 
-/* If we previously used quicklistDecompressNodeForUse(), just recompress. */
+/* 仅压缩需要重压缩的节点
+ * If we previously used quicklistDecompressNodeForUse(), just recompress. 
+ */
 #define quicklistRecompressOnly(_ql, _node)                                    \
     do {                                                                       \
         if ((_node)->recompress)                                               \
             quicklistCompressNode((_node));                                    \
     } while (0)
 
-/* Insert 'new_node' after 'old_node' if 'after' is 1.
+/* 插入节点，after表示插入的方向，new_node为新节点
+ * Insert 'new_node' after 'old_node' if 'after' is 1.
  * Insert 'new_node' before 'old_node' if 'after' is 0.
  * Note: 'new_node' is *always* uncompressed, so if we assign it to
- *       head or tail, we do not need to uncompress it. */
+ *       head or tail, we do not need to uncompress it. 
+ */
 REDIS_STATIC void __quicklistInsertNode(quicklist *quicklist,
                                         quicklistNode *old_node,
                                         quicklistNode *new_node, int after) {
-    if (after) {
+	// after为1则在old_node之后插入new_node
+	if (after) {
         new_node->prev = old_node;
         if (old_node) {
             new_node->next = old_node->next;
