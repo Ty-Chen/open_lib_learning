@@ -433,11 +433,15 @@ REDIS_STATIC void __quicklistInsertNode(quicklist *quicklist,
         if (quicklist->head == old_node)
             quicklist->head = new_node;
     }
-    /* If this insert creates the only element so far, initialize head/tail. */
+	
+    /* 若是加入第一个元素则初始化首尾
+     * If this insert creates the only element so far, initialize head/tail. 
+     */
     if (quicklist->len == 0) {
         quicklist->head = quicklist->tail = new_node;
     }
 
+	// 压缩旧节点
     if (old_node)
         quicklistCompress(quicklist, old_node);
 
