@@ -448,7 +448,9 @@ REDIS_STATIC void __quicklistInsertNode(quicklist *quicklist,
     quicklist->len++;
 }
 
-/* Wrappers for node inserting around existing node. */
+/* 对函数__quicklistInsertNode进行封装
+ * Wrappers for node inserting around existing node. 
+ */
 REDIS_STATIC void _quicklistInsertNodeBefore(quicklist *quicklist,
                                              quicklistNode *old_node,
                                              quicklistNode *new_node) {
@@ -461,6 +463,7 @@ REDIS_STATIC void _quicklistInsertNodeAfter(quicklist *quicklist,
     __quicklistInsertNode(quicklist, old_node, new_node, 1);
 }
 
+/*根据sz大小判断优化等级是否满足要求*/
 REDIS_STATIC int
 _quicklistNodeSizeMeetsOptimizationRequirement(const size_t sz,
                                                const int fill) {
@@ -481,6 +484,7 @@ _quicklistNodeSizeMeetsOptimizationRequirement(const size_t sz,
 
 #define sizeMeetsSafetyLimit(sz) ((sz) <= SIZE_SAFETY_LIMIT)
 
+// 
 REDIS_STATIC int _quicklistNodeAllowInsert(const quicklistNode *node,
                                            const int fill, const size_t sz) {
     if (unlikely(!node))
