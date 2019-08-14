@@ -484,20 +484,26 @@ _quicklistNodeSizeMeetsOptimizationRequirement(const size_t sz,
 
 #define sizeMeetsSafetyLimit(sz) ((sz) <= SIZE_SAFETY_LIMIT)
 
-// 
+// 调用上述函数判断是否可以加入节点
 REDIS_STATIC int _quicklistNodeAllowInsert(const quicklistNode *node,
                                            const int fill, const size_t sz) {
+    //节点为空返回0
     if (unlikely(!node))
         return 0;
 
     int ziplist_overhead;
-    /* size of previous offset */
+	
+    /* 前置偏移量加入sz
+     * size of previous offset 
+     */
     if (sz < 254)
         ziplist_overhead = 1;
     else
         ziplist_overhead = 5;
 
-    /* size of forward offset */
+    /* 后续偏移量加入sz
+     * size of forward offset 
+     */
     if (sz < 64)
         ziplist_overhead += 1;
     else if (likely(sz < 16384))
@@ -505,8 +511,12 @@ REDIS_STATIC int _quicklistNodeAllowInsert(const quicklistNode *node,
     else
         ziplist_overhead += 5;
 
-    /* new_sz overestimates if 'sz' encodes to an integer type */
+    /* 加入节点后的预估sz
+     * new_sz overestimates if 'sz' encodes to an integer type 
+     */
     unsigned int new_sz = node->sz + sz + ziplist_overhead;
+
+	//调用函数判断是否可以插入
     if (likely(_quicklistNodeSizeMeetsOptimizationRequirement(new_sz, fill)))
         return 1;
     else if (!sizeMeetsSafetyLimit(new_sz))
