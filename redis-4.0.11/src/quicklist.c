@@ -606,9 +606,11 @@ int quicklistPushTail(quicklist *quicklist, void *value, size_t sz) {
     return (orig_tail != quicklist->tail);
 }
 
-/* Create new node consisting of a pre-formed ziplist.
+/* 在快速链表尾部插入一个新节点保存压缩链表
+ * Create new node consisting of a pre-formed ziplist.
  * Used for loading RDBs where entire ziplists have been stored
- * to be retrieved later. */
+ * to be retrieved later. 
+ */
 void quicklistAppendZiplist(quicklist *quicklist, unsigned char *zl) {
     quicklistNode *node = quicklistCreateNode();
 
