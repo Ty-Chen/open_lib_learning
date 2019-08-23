@@ -561,12 +561,15 @@ REDIS_STATIC int _quicklistNodeAllowMerge(const quicklistNode *a,
  * Returns 1 if new head created. */
 int quicklistPushHead(quicklist *quicklist, void *value, size_t sz) {
     quicklistNode *orig_head = quicklist->head;
+	//如果头部快速链表节点可以插入新的压缩链表项则插入
     if (likely(
             _quicklistNodeAllowInsert(quicklist->head, quicklist->fill, sz))) {
         quicklist->head->zl =
             ziplistPush(quicklist->head->zl, value, sz, ZIPLIST_HEAD);
         quicklistNodeUpdateSz(quicklist->head);
-    } else {
+    } 
+	//不能插入则新建一个快速链表节点，插入新项，并将该节点设置为新头部
+	else {
         quicklistNode *node = quicklistCreateNode();
         node->zl = ziplistPush(ziplistNew(), value, sz, ZIPLIST_HEAD);
 
@@ -578,7 +581,9 @@ int quicklistPushHead(quicklist *quicklist, void *value, size_t sz) {
     return (orig_head != quicklist->head);
 }
 
-/* Add new entry to tail node of quicklist.
+/* 在尾部插入新项，和头部类似，如果可以插入则直接插入
+ * 否则新建尾部并插入
+ * Add new entry to tail node of quicklist.
  *
  * Returns 0 if used existing tail.
  * Returns 1 if new tail created. */
