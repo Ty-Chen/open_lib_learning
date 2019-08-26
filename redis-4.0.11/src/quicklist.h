@@ -108,7 +108,7 @@ typedef struct quicklistIter {
     int direction;
 } quicklistIter;
 
-/* 快速链表入口，便于插入和遍历 */
+/* 快速链表表项，便于插入和遍历 */
 typedef struct quicklistEntry {
     const quicklist *quicklist;
     quicklistNode *node;
