@@ -622,7 +622,8 @@ void quicklistAppendZiplist(quicklist *quicklist, unsigned char *zl) {
     quicklist->count += node->count;
 }
 
-/* Append all values of ziplist 'zl' individually into 'quicklist'.
+/* 将压缩链表zl添加至快速链表中。
+ * Append all values of ziplist 'zl' individually into 'quicklist'.
  *
  * This allows us to restore old RDB ziplists into new quicklists
  * with smaller ziplist sizes than the saved RDB ziplist.
@@ -636,6 +637,8 @@ quicklist *quicklistAppendValuesFromZiplist(quicklist *quicklist,
     char longstr[32] = {0};
 
     unsigned char *p = ziplistIndex(zl, 0);
+	
+	//循环读出压缩链表各项，并依次存在快速链表尾部
     while (ziplistGet(p, &value, &sz, &longval)) {
         if (!value) {
             /* Write the longval as a string so we can re-add it */
@@ -649,9 +652,11 @@ quicklist *quicklistAppendValuesFromZiplist(quicklist *quicklist,
     return quicklist;
 }
 
-/* Create new (potentially multi-node) quicklist from a single existing ziplist.
+/* 根据已有的压缩链表创建快速链表：调用上面的函数实现，即加入空快速链表
+ * Create new (potentially multi-node) quicklist from a single existing ziplist.
  *
- * Returns new quicklist.  Frees passed-in ziplist 'zl'. */
+ * Returns new quicklist.  Frees passed-in ziplist 'zl'. 
+ */
 quicklist *quicklistCreateFromZiplist(int fill, int compress,
                                       unsigned char *zl) {
     return quicklistAppendValuesFromZiplist(quicklistNew(fill, compress), zl);
