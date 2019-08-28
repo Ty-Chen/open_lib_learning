@@ -670,6 +670,7 @@ quicklist *quicklistCreateFromZiplist(int fill, int compress,
         }                                                                      \
     } while (0)
 
+//删除快速链表节点
 REDIS_STATIC void __quicklistDelNode(quicklist *quicklist,
                                      quicklistNode *node) {
     if (node->next)
