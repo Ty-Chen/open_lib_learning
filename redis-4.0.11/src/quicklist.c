@@ -673,11 +673,13 @@ quicklist *quicklistCreateFromZiplist(int fill, int compress,
 //删除快速链表节点
 REDIS_STATIC void __quicklistDelNode(quicklist *quicklist,
                                      quicklistNode *node) {
+    //处理前后节点指针关系
     if (node->next)
         node->next->prev = node->prev;
     if (node->prev)
         node->prev->next = node->next;
 
+	//判断首/尾节点特殊情况
     if (node == quicklist->tail) {
         quicklist->tail = node->prev;
     }
@@ -686,25 +688,31 @@ REDIS_STATIC void __quicklistDelNode(quicklist *quicklist,
         quicklist->head = node->next;
     }
 
-    /* If we deleted a node within our compress depth, we
-     * now have compressed nodes needing to be decompressed. */
+    /* 内部节点的删除使得整个链表需要重新根据压缩深度整理
+     * If we deleted a node within our compress depth, we
+     * now have compressed nodes needing to be decompressed. 
+     */
     __quicklistCompress(quicklist, NULL);
 
+	//计数减少
     quicklist->count -= node->count;
 
+	//释放节点
     zfree(node->zl);
     zfree(node);
     quicklist->len--;
 }
 
-/* Delete one entry from list given the node for the entry and a pointer
+/* 根据给出的节点和指针删除指定表项
+ * Delete one entry from list given the node for the entry and a pointer
  * to the entry in the node.
  *
  * Note: quicklistDelIndex() *requires* uncompressed nodes because you
  *       already had to get *p from an uncompressed node somewhere.
  *
  * Returns 1 if the entire node was deleted, 0 if node still exists.
- * Also updates in/out param 'p' with the next offset in the ziplist. */
+ * Also updates in/out param 'p' with the next offset in the ziplist. 
+ */
 REDIS_STATIC int quicklistDelIndex(quicklist *quicklist, quicklistNode *node,
                                    unsigned char **p) {
     int gone = 0;
