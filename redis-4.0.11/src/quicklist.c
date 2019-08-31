@@ -717,14 +717,18 @@ REDIS_STATIC int quicklistDelIndex(quicklist *quicklist, quicklistNode *node,
                                    unsigned char **p) {
     int gone = 0;
 
+	//删除zl中的p指向的节点，计数递减
     node->zl = ziplistDelete(node->zl, p);
     node->count--;
+
+	//若该zl中已无节点则删除该zl返回1，否则更新快速链表大小返回0
     if (node->count == 0) {
         gone = 1;
         __quicklistDelNode(quicklist, node);
     } else {
         quicklistNodeUpdateSz(node);
     }
+	//快速链表节点递减
     quicklist->count--;
     /* If we deleted the node, the original node is no longer valid */
     return gone ? 1 : 0;
@@ -733,7 +737,8 @@ REDIS_STATIC int quicklistDelIndex(quicklist *quicklist, quicklistNode *node,
 /* Delete one element represented by 'entry'
  *
  * 'entry' stores enough metadata to delete the proper position in
- * the correct ziplist in the correct quicklist node. */
+ * the correct ziplist in the correct quicklist node. 
+ */
 void quicklistDelEntry(quicklistIter *iter, quicklistEntry *entry) {
     quicklistNode *prev = entry->node->prev;
     quicklistNode *next = entry->node->next;
