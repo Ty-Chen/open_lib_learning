@@ -703,7 +703,7 @@ REDIS_STATIC void __quicklistDelNode(quicklist *quicklist,
     quicklist->len--;
 }
 
-/* 根据给出的节点和指针删除指定表项
+/* 根据给出的节点和指针删除指定压缩链表表项
  * Delete one entry from list given the node for the entry and a pointer
  * to the entry in the node.
  *
@@ -734,12 +734,14 @@ REDIS_STATIC int quicklistDelIndex(quicklist *quicklist, quicklistNode *node,
     return gone ? 1 : 0;
 }
 
-/* Delete one element represented by 'entry'
+/* 删除快速链表表项
+ * Delete one element represented by 'entry'
  *
  * 'entry' stores enough metadata to delete the proper position in
  * the correct ziplist in the correct quicklist node. 
  */
 void quicklistDelEntry(quicklistIter *iter, quicklistEntry *entry) {
+
     quicklistNode *prev = entry->node->prev;
     quicklistNode *next = entry->node->next;
     int deleted_node = quicklistDelIndex((quicklist *)entry->quicklist,
@@ -758,6 +760,7 @@ void quicklistDelEntry(quicklistIter *iter, quicklistEntry *entry) {
             iter->offset = -1;
         }
     }
+	
     /* else if (!deleted_node), no changes needed.
      * we already reset iter->zi above, and the existing iter->offset
      * doesn't move again because:
