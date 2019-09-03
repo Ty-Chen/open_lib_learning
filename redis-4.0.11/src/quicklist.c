@@ -742,15 +742,20 @@ REDIS_STATIC int quicklistDelIndex(quicklist *quicklist, quicklistNode *node,
  */
 void quicklistDelEntry(quicklistIter *iter, quicklistEntry *entry) {
 
+	//保留前后指针
     quicklistNode *prev = entry->node->prev;
     quicklistNode *next = entry->node->next;
+
+	//根据表项entry和索引zi删除节点
     int deleted_node = quicklistDelIndex((quicklist *)entry->quicklist,
                                          entry->node, &entry->zi);
 
     /* after delete, the zi is now invalid for any future usage. */
     iter->zi = NULL;
 
-    /* If current node is deleted, we must update iterator node and offset. */
+    /* 若当前节点被删除，则需要更新迭代器
+     * If current node is deleted, we must update iterator node and offset. 
+     */
     if (deleted_node) {
         if (iter->direction == AL_START_HEAD) {
             iter->current = next;
@@ -790,7 +795,8 @@ int quicklistReplaceAtIndex(quicklist *quicklist, long index, void *data,
     }
 }
 
-/* Given two nodes, try to merge their ziplists.
+/* 融合两个节点的压缩链表，返回融合后的新节点
+ * Given two nodes, try to merge their ziplists.
  *
  * This helps us not have a quicklist with 3 element ziplists if
  * our fill factor can handle much higher levels.
@@ -808,11 +814,16 @@ REDIS_STATIC quicklistNode *_quicklistZiplistMerge(quicklist *quicklist,
                                                    quicklistNode *b) {
     D("Requested merge (a,b) (%u, %u)", a->count, b->count);
 
+	//展开节点
     quicklistDecompressNode(a);
     quicklistDecompressNode(b);
+
+	//压缩链表融合
     if ((ziplistMerge(&a->zl, &b->zl))) {
         /* We merged ziplists! Now remove the unused quicklistNode. */
         quicklistNode *keep = NULL, *nokeep = NULL;
+
+		//根据融合结果选择保留a还是b
         if (!a->zl) {
             nokeep = a;
             keep = b;
@@ -820,9 +831,12 @@ REDIS_STATIC quicklistNode *_quicklistZiplistMerge(quicklist *quicklist,
             nokeep = b;
             keep = a;
         }
+
+		//更新信息
         keep->count = ziplistLen(keep->zl);
         quicklistNodeUpdateSz(keep);
 
+		//删除无用节点，对新节点进行压缩处理
         nokeep->count = 0;
         __quicklistDelNode(quicklist, nokeep);
         quicklistCompress(quicklist, keep);
