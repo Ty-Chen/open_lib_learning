@@ -847,7 +847,8 @@ REDIS_STATIC quicklistNode *_quicklistZiplistMerge(quicklist *quicklist,
     }
 }
 
-/* Attempt to merge ziplists within two nodes on either side of 'center'.
+/* 对快速链表从中间开始两边分别融合：前2个+中间+后2个融合成1个节点
+ * Attempt to merge ziplists within two nodes on either side of 'center'.
  *
  * We attempt to merge:
  *   - (center->prev->prev, center->prev)
@@ -861,25 +862,31 @@ REDIS_STATIC void _quicklistMergeNodes(quicklist *quicklist,
     quicklistNode *prev, *prev_prev, *next, *next_next, *target;
     prev = prev_prev = next = next_next = target = NULL;
 
+	//获取前向节点
     if (center->prev) {
         prev = center->prev;
         if (center->prev->prev)
             prev_prev = center->prev->prev;
     }
 
+	//获取后向节点
     if (center->next) {
         next = center->next;
         if (center->next->next)
             next_next = center->next->next;
     }
 
-    /* Try to merge prev_prev and prev */
+    /* 尝试前向节点融合
+     * Try to merge prev_prev and prev 
+     */
     if (_quicklistNodeAllowMerge(prev, prev_prev, fill)) {
         _quicklistZiplistMerge(quicklist, prev_prev, prev);
         prev_prev = prev = NULL; /* they could have moved, invalidate them. */
     }
 
-    /* Try to merge next and next_next */
+    /* 尝试后向节点融合
+     * Try to merge next and next_next 
+     */
     if (_quicklistNodeAllowMerge(next, next_next, fill)) {
         _quicklistZiplistMerge(quicklist, next, next_next);
         next = next_next = NULL; /* they could have moved, invalidate them. */
