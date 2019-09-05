@@ -892,7 +892,9 @@ REDIS_STATIC void _quicklistMergeNodes(quicklist *quicklist,
         next = next_next = NULL; /* they could have moved, invalidate them. */
     }
 
-    /* Try to merge center node and previous node */
+    /* 中间节点和前向进行融合
+     * Try to merge center node and previous node
+     */
     if (_quicklistNodeAllowMerge(center, center->prev, fill)) {
         target = _quicklistZiplistMerge(quicklist, center->prev, center);
         center = NULL; /* center could have been deleted, invalidate it. */
@@ -901,7 +903,9 @@ REDIS_STATIC void _quicklistMergeNodes(quicklist *quicklist,
         target = center;
     }
 
-    /* Use result of center merge (or original) to merge with next node. */
+    /* 和后向新节点进行融合
+     * Use result of center merge (or original) to merge with next node. 
+     */
     if (_quicklistNodeAllowMerge(target, target->next, fill)) {
         _quicklistZiplistMerge(quicklist, target, target->next);
     }
