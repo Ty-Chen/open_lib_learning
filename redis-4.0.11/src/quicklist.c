@@ -911,7 +911,8 @@ REDIS_STATIC void _quicklistMergeNodes(quicklist *quicklist,
     }
 }
 
-/* Split 'node' into two parts, parameterized by 'offset' and 'after'.
+/* 根据offset和after分割快速链表
+ * Split 'node' into two parts, parameterized by 'offset' and 'after'.
  *
  * The 'after' argument controls which quicklistNode gets returned.
  * If 'after'==1, returned node has elements after 'offset'.
