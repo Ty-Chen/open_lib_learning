@@ -911,7 +911,9 @@ REDIS_STATIC void _quicklistMergeNodes(quicklist *quicklist,
     }
 }
 
-/* 根据offset和after分割快速链表
+/* 根据offset和after分割快速链表的节点
+ * after为1则返回包含从offset到结尾的值的节点，0到offset的值保存在传参指针node中
+ * after为0则刚好相反
  * Split 'node' into two parts, parameterized by 'offset' and 'after'.
  *
  * The 'after' argument controls which quicklistNode gets returned.
@@ -933,12 +935,16 @@ REDIS_STATIC void _quicklistMergeNodes(quicklist *quicklist,
  * Returns newly created node or NULL if split not possible. */
 REDIS_STATIC quicklistNode *_quicklistSplitNode(quicklistNode *node, int offset,
                                                 int after) {
+    //获取压缩链表的大小
     size_t zl_sz = node->sz;
 
+	//创建新快速链表节点保存
     quicklistNode *new_node = quicklistCreateNode();
     new_node->zl = zmalloc(zl_sz);
 
-    /* Copy original ziplist so we can split it */
+    /* 拷贝压缩链表到新节点 
+     * Copy original ziplist so we can split it 
+	 */
     memcpy(new_node->zl, node->zl, zl_sz);
 
     /* -1 here means "continue deleting until the list ends" */
@@ -950,10 +956,12 @@ REDIS_STATIC quicklistNode *_quicklistSplitNode(quicklistNode *node, int offset,
     D("After %d (%d); ranges: [%d, %d], [%d, %d]", after, offset, orig_start,
       orig_extent, new_start, new_extent);
 
+	//删除orig_start到orig_extent的压缩链表节点项
     node->zl = ziplistDeleteRange(node->zl, orig_start, orig_extent);
     node->count = ziplistLen(node->zl);
     quicklistNodeUpdateSz(node);
-
+	
+	//删除new_start到new_extent的压缩链表节点项
     new_node->zl = ziplistDeleteRange(new_node->zl, new_start, new_extent);
     new_node->count = ziplistLen(new_node->zl);
     quicklistNodeUpdateSz(new_node);
@@ -962,10 +970,12 @@ REDIS_STATIC quicklistNode *_quicklistSplitNode(quicklistNode *node, int offset,
     return new_node;
 }
 
-/* Insert a new entry before or after existing entry 'entry'.
+/* 根据after的值在快速链表项前/后插入新项，值为value,大小为sz
+ * Insert a new entry before or after existing entry 'entry'.
  *
- * If after==1, the new value is inserted after 'entry', otherwise
- * the new value is inserted before 'entry'. */
+ * If after == 1, the new value is inserted after 'entry', otherwise
+ * the new value is inserted before 'entry'. 
+ */
 REDIS_STATIC void _quicklistInsert(quicklist *quicklist, quicklistEntry *entry,
                                    void *value, const size_t sz, int after) {
     int full = 0, at_tail = 0, at_head = 0, full_next = 0, full_prev = 0;
@@ -973,6 +983,7 @@ REDIS_STATIC void _quicklistInsert(quicklist *quicklist, quicklistEntry *entry,
     quicklistNode *node = entry->node;
     quicklistNode *new_node = NULL;
 
+	//若该快速链表为空则很简单，直接插入即可
     if (!node) {
         /* we have no reference node, so let's create only node in the list */
         D("No node given!");
