@@ -995,13 +995,16 @@ REDIS_STATIC void _quicklistInsert(quicklist *quicklist, quicklistEntry *entry,
         return;
     }
 
-    /* Populate accounting flags for easier boolean checks later */
+    /* 检测当前节点是否可以插入
+     * Populate accounting flags for easier boolean checks later 
+     */
     if (!_quicklistNodeAllowInsert(node, fill, sz)) {
         D("Current node is full with count %d with requested fill %lu",
           node->count, fill);
         full = 1;
     }
 
+	//尾部插入的情况，检测是否可以插入
     if (after && (entry->offset == node->count)) {
         D("At Tail of current ziplist");
         at_tail = 1;
@@ -1011,6 +1014,7 @@ REDIS_STATIC void _quicklistInsert(quicklist *quicklist, quicklistEntry *entry,
         }
     }
 
+	//头部插入的情况，检测是否可以插入
     if (!after && (entry->offset == 0)) {
         D("At Head");
         at_head = 1;
@@ -1020,7 +1024,9 @@ REDIS_STATIC void _quicklistInsert(quicklist *quicklist, quicklistEntry *entry,
         }
     }
 
-    /* Now determine where and how to insert the new element */
+    /* 根据上面的检测决定如何、在哪里插入新元素
+     * Now determine where and how to insert the new element 
+     */
     if (!full && after) {
         D("Not full, inserting after current position.");
         quicklistDecompressNodeForUse(node);
