@@ -1103,12 +1103,14 @@ void quicklistInsertAfter(quicklist *quicklist, quicklistEntry *entry,
     _quicklistInsert(quicklist, entry, value, sz, 1);
 }
 
-/* Delete a range of elements from the quicklist.
+/* 删除一个范围内的快速链表
+ * Delete a range of elements from the quicklist.
  *
  * elements may span across multiple quicklistNodes, so we
  * have to be careful about tracking where we start and end.
  *
- * Returns 1 if entries were deleted, 0 if nothing was deleted. */
+ * Returns 1 if entries were deleted, 0 if nothing was deleted. 
+ */
 int quicklistDelRange(quicklist *quicklist, const long start,
                       const long count) {
     if (count <= 0)
@@ -1116,6 +1118,7 @@ int quicklistDelRange(quicklist *quicklist, const long start,
 
     unsigned long extent = count; /* range is inclusive of start position */
 
+	//考虑到可能范围超过了存在的节点数，因此需要对start和count进行判断处理
     if (start >= 0 && extent > (quicklist->count - start)) {
         /* if requesting delete more elements than exist, limit to list size. */
         extent = quicklist->count - start;
