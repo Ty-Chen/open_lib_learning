@@ -1127,6 +1127,7 @@ int quicklistDelRange(quicklist *quicklist, const long start,
         extent = -start; /* c.f. LREM -29 29; just delete until end. */
     }
 
+	//根据start查找入口节点entry
     quicklistEntry entry;
     if (!quicklistIndex(quicklist, start, &entry))
         return 0;
@@ -1135,27 +1136,35 @@ int quicklistDelRange(quicklist *quicklist, const long start,
       count, extent);
     quicklistNode *node = entry.node;
 
-    /* iterate over next nodes until everything is deleted. */
+    /* 循环删除所有节点
+     * iterate over next nodes until everything is deleted. 
+     */
     while (extent) {
         quicklistNode *next = node->next;
 
         unsigned long del;
         int delete_entire_node = 0;
         if (entry.offset == 0 && extent >= node->count) {
-            /* If we are deleting more than the count of this node, we
-             * can just delete the entire node without ziplist math. */
+            /* 若需要删除的多于节点总数，则直接删除整个节点
+             * If we are deleting more than the count of this node, we
+             * can just delete the entire node without ziplist math. 
+             */
             delete_entire_node = 1;
             del = node->count;
         } else if (entry.offset >= 0 && extent >= node->count) {
-            /* If deleting more nodes after this one, calculate delete based
-             * on size of current node. */
+            /* 根据需要删除节点数计算删除数
+             * If deleting more nodes after this one, calculate delete based
+             * on size of current node. 
+             */
             del = node->count - entry.offset;
         } else if (entry.offset < 0) {
-            /* If offset is negative, we are in the first run of this loop
+            /* 负值表示删除整个范围
+             * If offset is negative, we are in the first run of this loop
              * and we are deleting the entire range
              * from this start offset to end of list.  Since the Negative
              * offset is the number of elements until the tail of the list,
-             * just use it directly as the deletion count. */
+             * just use it directly as the deletion count. 
+             */
             del = -entry.offset;
 
             /* If the positive offset is greater than the remaining extent,
@@ -1200,8 +1209,10 @@ int quicklistCompare(unsigned char *p1, unsigned char *p2, int p2_len) {
     return ziplistCompare(p1, p2, p2_len);
 }
 
-/* Returns a quicklist iterator 'iter'. After the initialization every
- * call to quicklistNext() will return the next element of the quicklist. */
+/* 返回快速列表迭代器
+ * Returns a quicklist iterator 'iter'. After the initialization every
+ * call to quicklistNext() will return the next element of the quicklist. 
+ */
 quicklistIter *quicklistGetIterator(const quicklist *quicklist, int direction) {
     quicklistIter *iter;
 
