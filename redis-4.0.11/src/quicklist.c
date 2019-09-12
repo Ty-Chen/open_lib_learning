@@ -1218,6 +1218,7 @@ quicklistIter *quicklistGetIterator(const quicklist *quicklist, int direction) {
 
     iter = zmalloc(sizeof(*iter));
 
+	//根据方向赋值iter
     if (direction == AL_START_HEAD) {
         iter->current = quicklist->head;
         iter->offset = 0;
@@ -1234,13 +1235,16 @@ quicklistIter *quicklistGetIterator(const quicklist *quicklist, int direction) {
     return iter;
 }
 
-/* Initialize an iterator at a specific offset 'idx' and make the iterator
- * return nodes in 'direction' direction. */
+/* 在指定位置idx初始化一个iter迭代器指针
+ * Initialize an iterator at a specific offset 'idx' and make the iterator
+ * return nodes in 'direction' direction. 
+ */
 quicklistIter *quicklistGetIteratorAtIdx(const quicklist *quicklist,
                                          const int direction,
                                          const long long idx) {
     quicklistEntry entry;
 
+	//原理就是先找到指定节点，再在指定节点获取iter，再给其赋值
     if (quicklistIndex(quicklist, idx, &entry)) {
         quicklistIter *base = quicklistGetIterator(quicklist, direction);
         base->zi = NULL;
