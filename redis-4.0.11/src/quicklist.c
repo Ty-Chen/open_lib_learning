@@ -1265,7 +1265,8 @@ void quicklistReleaseIterator(quicklistIter *iter) {
     zfree(iter);
 }
 
-/* Get next element in iterator.
+/* 获取下一个iter
+ * Get next element in iterator.
  *
  * Note: You must NOT insert into the list while iterating over it.
  * You *may* delete from the list while iterating using the
