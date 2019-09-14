@@ -1290,22 +1290,27 @@ void quicklistReleaseIterator(quicklistIter *iter) {
 int quicklistNext(quicklistIter *iter, quicklistEntry *entry) {
     initEntry(entry);
 
+	//空指针异常处理
     if (!iter) {
         D("Returning because no iter!");
         return 0;
     }
 
+	//记录当前iter
     entry->quicklist = iter->quicklist;
     entry->node = iter->current;
 
+	//节点空则返回
     if (!iter->current) {
         D("Returning because current node is NULL")
         return 0;
     }
 
+	//函数指针用于根据方向判断调用上一个还是下一个的函数
     unsigned char *(*nextFn)(unsigned char *, unsigned char *) = NULL;
     int offset_update = 0;
 
+	//若zi为空则获取当前索引
     if (!iter->zi) {
         /* If !zi, use current index. */
         quicklistDecompressNodeForUse(iter->current);
@@ -1323,9 +1328,11 @@ int quicklistNext(quicklistIter *iter, quicklistEntry *entry) {
         iter->offset += offset_update;
     }
 
+	//记录zi和offset
     entry->zi = iter->zi;
     entry->offset = iter->offset;
 
+	//若zi大于0则直接获取并返回，否则需要进入下一个快速链表项
     if (iter->zi) {
         /* Populate value from existing ziplist position */
         ziplistGet(entry->zi, &entry->value, &entry->sz, &entry->longval);
@@ -1350,21 +1357,26 @@ int quicklistNext(quicklistIter *iter, quicklistEntry *entry) {
     }
 }
 
-/* Duplicate the quicklist.
+/* 复制快速链表，返回复制成功的原快速链表
+ * Duplicate the quicklist.
  * On success a copy of the original quicklist is returned.
  *
  * The original quicklist both on success or error is never modified.
  *
- * Returns newly allocated quicklist. */
+ * Returns newly allocated quicklist. 
+ */
 quicklist *quicklistDup(quicklist *orig) {
     quicklist *copy;
 
+	//创建新的链表
     copy = quicklistNew(orig->fill, orig->compress);
 
+	//循环获取每一个快速链表节点并拷贝
     for (quicklistNode *current = orig->head; current;
          current = current->next) {
         quicklistNode *node = quicklistCreateNode();
 
+		//根据编码类型不同进行不同赋值
         if (current->encoding == QUICKLIST_NODE_ENCODING_LZF) {
             quicklistLZF *lzf = (quicklistLZF *)current->zl;
             size_t lzf_sz = sizeof(*lzf) + lzf->sz;
@@ -1380,6 +1392,7 @@ quicklist *quicklistDup(quicklist *orig) {
         node->sz = current->sz;
         node->encoding = current->encoding;
 
+		//在拷贝快速链表中插入该项
         _quicklistInsertNodeAfter(copy, copy->tail, node);
     }
 
@@ -1387,14 +1400,16 @@ quicklist *quicklistDup(quicklist *orig) {
     return copy;
 }
 
-/* Populate 'entry' with the element at the specified zero-based index
+/* 根据idx返回对应的快速链表项
+ * Populate 'entry' with the element at the specified zero-based index
  * where 0 is the head, 1 is the element next to head
  * and so on. Negative integers are used in order to count
  * from the tail, -1 is the last element, -2 the penultimate
  * and so on. If the index is out of range 0 is returned.
  *
  * Returns 1 if element found
- * Returns 0 if element not found */
+ * Returns 0 if element not found 
+ */
 int quicklistIndex(const quicklist *quicklist, const long long idx,
                    quicklistEntry *entry) {
     quicklistNode *n;
@@ -1405,6 +1420,7 @@ int quicklistIndex(const quicklist *quicklist, const long long idx,
     initEntry(entry);
     entry->quicklist = quicklist;
 
+	//根据forward判断方向
     if (!forward) {
         index = (-idx) - 1;
         n = quicklist->tail;
@@ -1416,6 +1432,7 @@ int quicklistIndex(const quicklist *quicklist, const long long idx,
     if (index >= quicklist->count)
         return 0;
 
+	//查找节点
     while (likely(n)) {
         if ((accum + n->count) > index) {
             break;
@@ -1433,6 +1450,7 @@ int quicklistIndex(const quicklist *quicklist, const long long idx,
     D("Found node: %p at accum %llu, idx %llu, sub+ %llu, sub- %llu", (void *)n,
       accum, index, index - accum, (-index) - 1 + accum);
 
+	//根据找到的节点赋值
     entry->node = n;
     if (forward) {
         /* forward = normal head-to-tail offset. */
@@ -1443,6 +1461,7 @@ int quicklistIndex(const quicklist *quicklist, const long long idx,
         entry->offset = (-index) - 1 + accum;
     }
 
+	//解压节点并赋值
     quicklistDecompressNodeForUse(entry->node);
     entry->zi = ziplistIndex(entry->node->zl, entry->offset);
     ziplistGet(entry->zi, &entry->value, &entry->sz, &entry->longval);
@@ -1451,7 +1470,9 @@ int quicklistIndex(const quicklist *quicklist, const long long idx,
     return 1;
 }
 
-/* Rotate quicklist by moving the tail element to the head. */
+/* 旋转快速链表：首尾位置互换
+ * Rotate quicklist by moving the tail element to the head. 
+ */
 void quicklistRotate(quicklist *quicklist) {
     if (quicklist->count <= 1)
         return;
