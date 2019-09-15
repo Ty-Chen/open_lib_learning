@@ -1477,7 +1477,9 @@ void quicklistRotate(quicklist *quicklist) {
     if (quicklist->count <= 1)
         return;
 
-    /* First, get the tail entry */
+    /* 获取尾部节点
+     * First, get the tail entry 
+     */
     unsigned char *p = ziplistIndex(quicklist->tail->zl, -1);
     unsigned char *value;
     long long longval;
@@ -1485,19 +1487,25 @@ void quicklistRotate(quicklist *quicklist) {
     char longstr[32] = {0};
     ziplistGet(p, &value, &sz, &longval);
 
-    /* If value found is NULL, then ziplistGet populated longval instead */
+    /* 若尾节点值为空则赋值0
+     * If value found is NULL, then ziplistGet populated longval instead 
+     */
     if (!value) {
         /* Write the longval as a string so we can re-add it */
         sz = ll2string(longstr, sizeof(longstr), longval);
         value = (unsigned char *)longstr;
     }
 
-    /* Add tail entry to head (must happen before tail is deleted). */
+    /* 将尾部节点加入头部
+     * Add tail entry to head (must happen before tail is deleted). 
+     */
     quicklistPushHead(quicklist, value, sz);
 
-    /* If quicklist has only one node, the head ziplist is also the
+    /* 针对仅有一个节点的特殊处理：重新获取p
+     * If quicklist has only one node, the head ziplist is also the
      * tail ziplist and PushHead() could have reallocated our single ziplist,
-     * which would make our pre-existing 'p' unusable. */
+     * which would make our pre-existing 'p' unusable. 
+     */
     if (quicklist->len == 1) {
         p = ziplistIndex(quicklist->tail->zl, -1);
     }
@@ -1506,7 +1514,8 @@ void quicklistRotate(quicklist *quicklist) {
     quicklistDelIndex(quicklist, quicklist->tail, &p);
 }
 
-/* pop from quicklist and return result in 'data' ptr.  Value of 'data'
+/* 从快速链表弹出一项，返回数据指针。where必须为首或者尾部，不能弹出中间项
+ * pop from quicklist and return result in 'data' ptr.  Value of 'data'
  * is the return value of 'saver' function pointer if the data is NOT a number.
  *
  * If the quicklist element is a long long, then the return value is returned in
@@ -1534,6 +1543,7 @@ int quicklistPopCustom(quicklist *quicklist, int where, unsigned char **data,
     if (sval)
         *sval = -123456789;
 
+	//判断首尾
     quicklistNode *node;
     if (where == QUICKLIST_HEAD && quicklist->head) {
         node = quicklist->head;
